@@ -1,0 +1,64 @@
+{
+  "name": "student-management-backend",
+  "version": "1.0.0",
+  "description": "A comprehensive FastAPI-based student management system with advanced logging and analytics",
+  "main": "app/main.py",
+  "scripts": {
+    "start": "python scripts/run.py",
+    "dev": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "test": "python -m pytest tests/",
+    "install": "pip install -r requirements.txt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/student-management-backend.git"
+  },
+  "keywords": [
+    "fastapi",
+    "student-management",
+    "sqlmodel",
+    "analytics",
+    "logging",
+    "crud",
+    "api",
+    "education"
+  ],
+  "author": "Student Management Team",
+  "license": "MIT",
+  "python_version": ">=3.8",
+  "dependencies": {
+    "fastapi": ">=0.104.1",
+    "uvicorn": ">=0.24.0",
+    "sqlmodel": ">=0.0.14",
+    "pandas": ">=2.1.4",
+    "beautifulsoup4": ">=4.12.2",
+    "requests": ">=2.31.0",
+    "openpyxl": ">=3.1.2"
+  },
+  "features": [
+    "RESTful API with FastAPI",
+    "SQLModel ORM with SQLite",
+    "Advanced daily logging system",
+    "Student CRUD operations",
+    "Analytics and reporting",
+    "Data import/export (Excel, CSV, XML)",
+    "Web scraping capabilities",
+    "CORS support",
+    "Request/response logging",
+    "Performance monitoring"
+  ],
+  "api_endpoints": {
+    "students": "/api/v1/students",
+    "analytics": "/api/v1/analytics",
+    "export": "/api/v1/export",
+    "crawler": "/api/v1/crawler",
+    "docs": "/docs",
+    "health": "/health"
+  },
+  "development": {
+    "setup": "Run scripts/run.py --install to install dependencies",
+    "start_dev": "python scripts/run.py",
+    "test_api": "Visit http://localhost:8000/docs for API testing",
+    "logs": "Check logs/ directory for daily logging"
+  }
+}

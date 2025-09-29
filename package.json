@@ -1,0 +1,39 @@
+{
+  "name": "student-management-backend",
+  "version": "1.0.0",
+  "description": "FastAPI backend for Student Management System",
+  "scripts": {
+    "start": "uvicorn app.main:app --host 0.0.0.0 --port 8000",
+    "dev": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "test": "pytest tests/ -v",
+    "lint": "flake8 app/",
+    "format": "black app/",
+    "setup": "pip install -r requirements.txt"
+  },
+  "dependencies": {
+    "fastapi": "^0.104.1",
+    "uvicorn": "^0.24.0",
+    "sqlmodel": "^0.0.14",
+    "pydantic": "^2.5.0",
+    "pandas": "^2.1.4",
+    "openpyxl": "^3.1.2",
+    "requests": "^2.31.0",
+    "beautifulsoup4": "^4.12.2"
+  },
+  "devDependencies": {
+    "pytest": "^7.4.3",
+    "black": "^23.0.0",
+    "flake8": "^6.0.0"
+  },
+  "keywords": [
+    "fastapi",
+    "python",
+    "student-management",
+    "api",
+    "backend",
+    "sqlmodel",
+    "sqlite"
+  ],
+  "author": "Student Management Team",
+  "license": "MIT"
+}
