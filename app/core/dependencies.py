@@ -1,12 +1,16 @@
 from fastapi import Depends, HTTPException, status
 from sqlmodel import Session
-from typing import Optional
+from typing import Optional, Generator
 
-from app.database import get_session
+def get_session() -> Generator[Session, None, None]:
+    """Get database session"""
+    from app.database import engine
+    with Session(engine) as session:
+        yield session
 
-def get_db() -> Session:
+def get_db(session: Session = Depends(get_session)) -> Session:
     """Dependency to get database session"""
-    return next(get_session())
+    return session
 
 async def get_current_user():
     """Dependency to get current user (placeholder for future authentication)"""
