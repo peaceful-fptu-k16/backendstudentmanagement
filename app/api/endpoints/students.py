@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, BackgroundTasks
 from sqlmodel import Session
 
@@ -110,6 +110,44 @@ def create_student(
         if "already exists" in str(e):
             raise StudentAlreadyExistsError(student.student_id)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/pandas-analytics", response_model=Dict[str, Any])
+def get_pandas_analytics(db: Session = Depends(get_db)):
+    """Get comprehensive analytics using pandas operations"""
+    from sqlmodel import select
+    from app.utils.serialization import convert_numpy_types, safe_dataframe_to_dict
+    
+    # Get all students
+    statement = select(Student)
+    students = db.exec(statement).all()
+    
+    if not students:
+        return {"message": "No students found"}
+    
+    # Create analytics DataFrame
+    df = DataService.create_analytics_dataframe(students)
+    
+    # Get advanced statistics
+    advanced_stats = DataService.get_advanced_statistics(df)
+    
+    # Build response with safe numpy conversion
+    response = {
+        "total_students": len(students),
+        "pandas_version": "2.1.4",
+        "analytics": convert_numpy_types(advanced_stats),
+        "data_quality": {
+            "students_with_complete_scores": int(df['has_all_scores'].sum()) if 'has_all_scores' in df.columns else 0,
+            "students_with_missing_data": int(df['missing_scores_count'].gt(0).sum()) if 'missing_scores_count' in df.columns else 0,
+            "average_missing_scores": float(df['missing_scores_count'].mean()) if 'missing_scores_count' in df.columns else 0.0
+        },
+        "performance_insights": {
+            "best_performers": safe_dataframe_to_dict(df.nlargest(5, 'average_score')[['student_id', 'full_name', 'average_score']]) if 'average_score' in df.columns else [],
+            "most_improved": safe_dataframe_to_dict(df.nlargest(3, 'score_variance')[['student_id', 'full_name', 'score_variance']]) if 'score_variance' in df.columns else []
+        }
+    }
+    
+    # Final conversion to ensure all numpy types are converted
+    return convert_numpy_types(response)
 
 @router.get("/{student_id}", response_model=StudentResponse)
 def get_student(
