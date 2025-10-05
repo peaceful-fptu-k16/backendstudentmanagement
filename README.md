@@ -11,7 +11,8 @@ A comprehensive **FastAPI-based backend system** for managing student records wi
 
 - 🚀 **Modern FastAPI** - Async API with automatic documentation
 - 🗄️ **SQLModel ORM** - Type-safe database operations
-- 📊 **Advanced Analytics** - Student performance insights
+- 📊 **Advanced Analytics** - Student performance insights with Pandas
+- 🎨 **Seaborn Visualizations** - Beautiful statistical charts and graphs
 - 📝 **Daily Logging** - Structured logging with daily folders
 - 📤 **Data Export** - Excel, CSV, XML export formats
 - 🌐 **Web Scraping** - Extract data from external sources
@@ -82,6 +83,17 @@ GET    /api/v1/analytics/hometown-analysis   # Geographic insights
 GET    /api/v1/export               # Export data (Excel/CSV/XML)
 ```
 
+### Visualizations (Seaborn) 🎨
+```
+GET    /api/v1/visualizations/score-distribution      # Score distribution charts
+GET    /api/v1/visualizations/correlation-heatmap     # Correlation matrix
+GET    /api/v1/visualizations/hometown-analysis       # Hometown insights
+GET    /api/v1/visualizations/age-performance         # Age vs performance
+GET    /api/v1/visualizations/performance-categories  # Performance categories
+GET    /api/v1/visualizations/comprehensive-report    # All charts
+GET    /api/v1/visualizations/info                    # Visualization info
+```
+
 ## 📊 Student Data Model
 
 ```json
@@ -102,6 +114,11 @@ GET    /api/v1/export               # Export data (Excel/CSV/XML)
   "grade": "Excellent"
 }
 ```
+
+**Subjects (3 môn học):**
+- 📐 **Math** (Toán) - Score 0-10
+- 📖 **Literature** (Văn) - Score 0-10
+- 🗣️ **English** (Tiếng Anh) - Score 0-10
 
 ## 🛠️ Development
 
@@ -182,9 +199,23 @@ docker run -p 8000:8000 student-management
 
 ## 📚 Documentation
 
+- **🎨 Seaborn Integration**: `SEABORN_QUICKSTART.md` | `SEABORN_GUIDE.md`
+- **🐼 Pandas Integration**: `PANDAS_INTEGRATION_GUIDE.md`
 - **📖 Daily Logging System**: `docs/DAILY_LOGGING_SYSTEM.md`
 - **📊 Logging Report**: `docs/LOGGING_REPORT.md`
 - **🔧 GitHub Copilot Instructions**: `.github/copilot/instructions.md`
+
+## 🎨 Visualization Dashboard
+
+Open `visualization_dashboard.html` in your browser for an interactive dashboard with all Seaborn charts!
+
+```bash
+# Start server
+python scripts/run.py
+
+# Open dashboard in browser
+start visualization_dashboard.html
+```
 
 ## 🤝 Contributing
 
