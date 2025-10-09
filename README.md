@@ -3,9 +3,15 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-green)](https://fastapi.tiangolo.com)
 [![SQLModel](https://img.shields.io/badge/SQLModel-0.0.14-red)](https://sqlmodel.tiangolo.com)
+[![XML](https://img.shields.io/badge/Response-XML-orange)](https://www.w3.org/XML/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A comprehensive **FastAPI-based backend system** for managing student records with advanced logging, analytics, and data processing capabilities.
+
+## ⚠️ **IMPORTANT: API now returns XML instead of JSON!**
+
+**Version 2.0.0** - All API endpoints now return **XML format** responses.  
+📖 Read [XML_API_MIGRATION.md](XML_API_MIGRATION.md) for migration guide.
 
 ## ✨ Features
 
@@ -18,6 +24,7 @@ A comprehensive **FastAPI-based backend system** for managing student records wi
 - 🌐 **Web Scraping** - Extract data from external sources
 - 🔄 **CORS Support** - Ready for frontend integration
 - 📈 **Performance Monitoring** - Request timing and metrics
+- 🔄 **XML Responses** - All endpoints return XML format (NEW in v2.0)
 
 ## 🚀 Quick Start
 
@@ -34,18 +41,46 @@ python scripts/run.py
 
 # 4. Access API documentation
 # Open http://localhost:8000/docs
+
+# 5. Test XML responses
+python test_xml_api.py
 ```
+
+## 🔄 XML Response Format
+
+All API endpoints now return XML instead of JSON:
+
+```xml
+<?xml version='1.0' encoding='UTF-8'?>
+<students>
+  <pagination>
+    <total>100</total>
+    <page>1</page>
+  </pagination>
+  <items>
+    <student>
+      <id>1</id>
+      <student_id>SV001</student_id>
+      <full_name>John Doe</full_name>
+      <average_score>8.33</average_score>
+    </student>
+  </items>
+</students>
+```
+
+📖 See [XML_SUMMARY.md](XML_SUMMARY.md) for complete examples.
 
 ## 🏗️ Project Structure
 
 ```
 student-management-backend/
 ├── app/                    # 🚀 Main application
-│   ├── api/endpoints/     # 🛣️  API route handlers  
+│   ├── api/endpoints/     # 🛣️  API route handlers (XML responses)
 │   ├── core/              # ⚙️  Core utilities (config, logging, db)
 │   ├── crud/              # 🗄️  Database operations
 │   ├── models/            # 📊 Data models (SQLModel)
 │   ├── services/          # 🔧 Business logic services
+│   ├── utils/             # 🛠️  Utilities (XML builders, serialization)
 │   └── main.py            # 🎯 FastAPI application entry
 ├── docs/                  # 📖 Documentation files
 ├── scripts/               # 🛠️  Utility scripts

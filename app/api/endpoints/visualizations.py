@@ -3,11 +3,12 @@ Visualization endpoints for Seaborn-based charts
 """
 from typing import Dict, Any
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import Response
 from sqlmodel import Session
 
 from app.core.dependencies import get_db
 from app.services.visualization_service import visualization_service
+from app.utils.xml_response import XMLBuilder
 
 router = APIRouter()
 
@@ -15,87 +16,99 @@ router = APIRouter()
 @router.get("/score-distribution")
 def get_score_distribution_chart(
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+):
     """
-    Generate score distribution visualization using Seaborn
+    Generate score distribution visualization using Seaborn - Returns XML
     
     Returns:
-        Base64 encoded PNG image with score distribution plots
+        XML with Base64 encoded PNG image with score distribution plots
     """
-    return visualization_service.generate_score_distribution_plot(db)
+    result = visualization_service.generate_score_distribution_plot(db)
+    xml_content = XMLBuilder.dict_to_xml(result, "visualization")
+    return Response(content=xml_content, media_type="application/xml")
 
 
 @router.get("/correlation-heatmap")
 def get_correlation_heatmap(
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+):
     """
-    Generate correlation heatmap between subjects
+    Generate correlation heatmap between subjects - Returns XML
     
     Returns:
-        Base64 encoded PNG image with correlation heatmap
+        XML with Base64 encoded PNG image with correlation heatmap
     """
-    return visualization_service.generate_correlation_heatmap(db)
+    result = visualization_service.generate_correlation_heatmap(db)
+    xml_content = XMLBuilder.dict_to_xml(result, "visualization")
+    return Response(content=xml_content, media_type="application/xml")
 
 
 @router.get("/hometown-analysis")
 def get_hometown_analysis_chart(
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+):
     """
-    Generate hometown-based analysis visualization
+    Generate hometown-based analysis visualization - Returns XML
     
     Returns:
-        Base64 encoded PNG image with hometown analysis
+        XML with Base64 encoded PNG image with hometown analysis
     """
-    return visualization_service.generate_hometown_analysis(db)
+    result = visualization_service.generate_hometown_analysis(db)
+    xml_content = XMLBuilder.dict_to_xml(result, "visualization")
+    return Response(content=xml_content, media_type="application/xml")
 
 
 @router.get("/age-performance")
 def get_age_performance_chart(
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+):
     """
-    Generate age vs performance analysis visualization
+    Generate age vs performance analysis visualization - Returns XML
     
     Returns:
-        Base64 encoded PNG image with age-performance analysis
+        XML with Base64 encoded PNG image with age-performance analysis
     """
-    return visualization_service.generate_age_performance_plot(db)
+    result = visualization_service.generate_age_performance_plot(db)
+    xml_content = XMLBuilder.dict_to_xml(result, "visualization")
+    return Response(content=xml_content, media_type="application/xml")
 
 
 @router.get("/performance-categories")
 def get_performance_categories_chart(
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+):
     """
-    Generate performance category distribution visualization
+    Generate performance category distribution visualization - Returns XML
     
     Returns:
-        Base64 encoded PNG image with performance categories
+        XML with Base64 encoded PNG image with performance categories
     """
-    return visualization_service.generate_performance_categories(db)
+    result = visualization_service.generate_performance_categories(db)
+    xml_content = XMLBuilder.dict_to_xml(result, "visualization")
+    return Response(content=xml_content, media_type="application/xml")
 
 
 @router.get("/comprehensive-report")
 def get_comprehensive_visualization_report(
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+):
     """
-    Generate comprehensive visualization report with all charts
+    Generate comprehensive visualization report with all charts - Returns XML
     
     Returns:
-        Dictionary containing all visualization charts in base64 format
+        XML containing all visualization charts in base64 format
     """
-    return visualization_service.generate_comprehensive_report(db)
+    result = visualization_service.generate_comprehensive_report(db)
+    xml_content = XMLBuilder.dict_to_xml(result, "comprehensive_report")
+    return Response(content=xml_content, media_type="application/xml")
 
 
 @router.get("/info")
-def get_visualization_info() -> Dict[str, Any]:
+def get_visualization_info():
     """
-    Get information about available visualizations
+    Get information about available visualizations - Returns XML
     """
-    return {
+    info = {
         "service": "Seaborn Visualization Service",
         "description": "Advanced data visualization using Seaborn and Matplotlib",
         "available_endpoints": [
@@ -128,7 +141,8 @@ def get_visualization_info() -> Dict[str, Any]:
             "encoding": "base64",
             "format": "PNG",
             "dpi": 300,
-            "usage": "Decode base64 string to display image"
+            "usage": "Decode base64 string to display image",
+            "response_format": "XML"
         },
         "libraries": {
             "seaborn": "Data visualization library",
@@ -136,3 +150,6 @@ def get_visualization_info() -> Dict[str, Any]:
             "pandas": "Data manipulation"
         }
     }
+    
+    xml_content = XMLBuilder.dict_to_xml(info, "visualization_info")
+    return Response(content=xml_content, media_type="application/xml")
