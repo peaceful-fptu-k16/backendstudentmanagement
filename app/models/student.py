@@ -137,17 +137,21 @@ class Student(StudentBase, table=True):
     
     def get_average_score(self) -> Optional[float]:
         """
-        Calculate average score from all available subject scores
+        Calculate average score from all three subject scores
         
-        Only includes non-null scores in the calculation.
-        If no scores are available, returns None.
+        IMPORTANT: Only calculates average if ALL three scores are available.
+        If any score is missing (None), returns None.
+        This ensures students appear in statistics only when they have complete scores.
         
         Returns:
-            Optional[float]: Average score (0-10) or None if no scores
+            Optional[float]: Average score (0-10) or None if any score is missing
         """
-        # Filter out None values from scores
-        scores = [s for s in [self.math_score, self.literature_score, self.english_score] if s is not None]
-        return sum(scores) / len(scores) if scores else None
+        # Require ALL three scores to be present
+        if self.math_score is None or self.literature_score is None or self.english_score is None:
+            return None
+        
+        # Calculate average only when all scores are available
+        return (self.math_score + self.literature_score + self.english_score) / 3
     
     def get_grade(self) -> Optional[str]:
         """

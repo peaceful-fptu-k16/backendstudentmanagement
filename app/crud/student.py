@@ -310,21 +310,36 @@ class StudentCRUD:
         return created_students, errors
     
     def get_analytics(self, db: Session) -> Dict[str, Any]:
-        """Get student analytics"""
+        """
+        Get student analytics
+        
+        Note: Only students with all three scores (math, literature, english) 
+        are included in grade distribution and average statistics.
+        """
         cache_key = "analytics"
         cached_result = self._get_from_cache(cache_key)
         if cached_result is not None:
             return cached_result
         
-        # Total students
+        # Total students in database
         total_students = db.exec(select(func.count(Student.id))).one()
         
         # Get all students for analysis
         students = db.exec(select(Student)).all()
         
+        # Filter students with complete scores (all 3 subjects)
+        students_with_complete_scores = [
+            s for s in students 
+            if s.math_score is not None 
+            and s.literature_score is not None 
+            and s.english_score is not None
+        ]
+        
         # Calculate analytics
         analytics = {
             "total_students": total_students,
+            "students_with_complete_scores": len(students_with_complete_scores),
+            "students_with_incomplete_scores": total_students - len(students_with_complete_scores),
             "average_scores": {},
             "score_distribution": {},
             "hometown_distribution": {},
@@ -332,11 +347,11 @@ class StudentCRUD:
             "subject_comparison": {}
         }
         
-        if students:
-            # Average scores by subject
-            math_scores = [s.math_score for s in students if s.math_score is not None]
-            lit_scores = [s.literature_score for s in students if s.literature_score is not None]
-            eng_scores = [s.english_score for s in students if s.english_score is not None]
+        if students_with_complete_scores:
+            # Average scores by subject (only from students with complete scores)
+            math_scores = [s.math_score for s in students_with_complete_scores]
+            lit_scores = [s.literature_score for s in students_with_complete_scores]
+            eng_scores = [s.english_score for s in students_with_complete_scores]
             
             analytics["average_scores"] = {
                 "math": sum(math_scores) / len(math_scores) if math_scores else None,
@@ -344,11 +359,11 @@ class StudentCRUD:
                 "english": sum(eng_scores) / len(eng_scores) if eng_scores else None
             }
             
-            # Score distribution
+            # Score distribution (only students with complete scores)
             score_ranges = {"0-4": 0, "4-5.5": 0, "5.5-7": 0, "7-8.5": 0, "8.5-10": 0}
-            for student in students:
+            for student in students_with_complete_scores:
                 avg = student.get_average_score()
-                if avg is not None:
+                if avg is not None:  # Should always be true here, but safety check
                     if avg < 4:
                         score_ranges["0-4"] += 1
                     elif avg < 5.5:
@@ -362,26 +377,26 @@ class StudentCRUD:
             
             analytics["score_distribution"] = score_ranges
             
-            # Hometown distribution
+            # Hometown distribution (all students, not just those with complete scores)
             hometown_count = {}
             for student in students:
                 if student.hometown:
                     hometown_count[student.hometown] = hometown_count.get(student.hometown, 0) + 1
             analytics["hometown_distribution"] = dict(sorted(hometown_count.items(), key=lambda x: x[1], reverse=True)[:10])
             
-            # Grade distribution
+            # Grade distribution (only students with complete scores)
             grade_count = {}
-            for student in students:
+            for student in students_with_complete_scores:
                 grade = student.get_grade()
-                if grade:
+                if grade:  # Should always be true here
                     grade_count[grade] = grade_count.get(grade, 0) + 1
             analytics["grade_distribution"] = grade_count
             
-            # Subject comparison
+            # Subject comparison (only students with complete scores)
             analytics["subject_comparison"] = {
-                "math_vs_english": self._compare_subjects(students, "math_score", "english_score"),
-                "math_vs_literature": self._compare_subjects(students, "math_score", "literature_score"),
-                "english_vs_literature": self._compare_subjects(students, "english_score", "literature_score")
+                "math_vs_english": self._compare_subjects(students_with_complete_scores, "math_score", "english_score"),
+                "math_vs_literature": self._compare_subjects(students_with_complete_scores, "math_score", "literature_score"),
+                "english_vs_literature": self._compare_subjects(students_with_complete_scores, "english_score", "literature_score")
             }
         
         self._set_cache(cache_key, analytics)
