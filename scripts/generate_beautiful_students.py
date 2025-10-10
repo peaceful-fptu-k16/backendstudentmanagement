@@ -47,37 +47,36 @@ hometowns = hometowns_northern * 4 + hometowns_other
 def generate_score():
     """
     Generate realistic score with normal distribution
-    Focused on average scores (6.0-7.5) with spread from low to high
+    Includes full range from F (fail) to A (excellent)
     
     Distribution:
-    - 5% Excellent (9.0-10.0)
-    - 20% Good (8.0-8.9)
-    - 50% Average (6.0-7.9) ← CONCENTRATED HERE
-    - 20% Below Average (4.5-5.9)
-    - 5% Poor (3.0-4.4)
+    - 8% Grade A - Excellent (9.0-10.0)
+    - 22% Grade B - Good (8.0-8.9)
+    - 45% Grade C - Average (6.0-7.9) ← CONCENTRATED HERE
+    - 18% Grade D - Below Average (4.0-5.9)
+    - 7% Grade F - Fail (0-3.9)
     """
     
     rand = random.random()
-    if rand < 0.05:  # 5% Excellent
+    if rand < 0.08:  # 8% Grade A (Excellent)
         return round(random.uniform(9.0, 10.0), 1)
-    elif rand < 0.25:  # 20% Good
+    elif rand < 0.30:  # 22% Grade B (Good)
         return round(random.uniform(8.0, 8.9), 1)
-    elif rand < 0.75:  # 50% Average (concentrated in middle)
+    elif rand < 0.75:  # 45% Grade C (Average - concentrated in middle)
         # More concentration around 6.5-7.5
         base = random.uniform(6.0, 7.9)
         # Add bias towards middle
         if 6.5 <= base <= 7.5:
-            # Higher probability in this range
             return round(base, 1)
         else:
             # Sometimes re-roll to increase concentration
             if random.random() < 0.3:
                 return round(random.uniform(6.5, 7.5), 1)
             return round(base, 1)
-    elif rand < 0.95:  # 20% Below Average
-        return round(random.uniform(4.5, 5.9), 1)
-    else:  # 5% Poor
-        return round(random.uniform(3.0, 4.4), 1)
+    elif rand < 0.93:  # 18% Grade D (Below Average)
+        return round(random.uniform(4.0, 5.9), 1)
+    else:  # 7% Grade F (Fail)
+        return round(random.uniform(0.5, 3.9), 1)
 
 def generate_birth_date():
     """Generate birth date between 2002-2005"""

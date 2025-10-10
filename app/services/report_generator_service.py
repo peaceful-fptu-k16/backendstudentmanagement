@@ -1044,10 +1044,6 @@ class ReportGeneratorService:
                 <div class="stat-value">{df['English Score'].mean():.2f}</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Overall Average</div>
-                <div class="stat-value">{df['Average Score'].mean():.2f}</div>
-            </div>
-            <div class="stat-box">
                 <div class="stat-label">Excellent Students</div>
                 <div class="stat-value">{(df['Grade'] == 'Excellent').sum()}</div>
             </div>
