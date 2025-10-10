@@ -27,42 +27,57 @@ last_names = [
     "Huỳnh", "Mai", "Tô", "Lâm", "Trịnh", "Hà", "Tăng", "Cao", "Phan", "Chu"
 ]
 
-# Vietnamese provinces/cities (63 tỉnh thành)
-hometowns = [
-    "Hà Nội", "TP.HCM", "Đà Nẵng", "Hải Phòng", "Cần Thơ",
-    "Hải Dương", "Hưng Yên", "Nam Định", "Thái Bình", "Ninh Bình",
-    "Thanh Hóa", "Nghệ An", "Hà Tĩnh", "Quảng Bình", "Quảng Trị",
-    "Thừa Thiên Huế", "Quảng Nam", "Quảng Ngãi", "Bình Định", "Phú Yên",
-    "Khánh Hòa", "Ninh Thuận", "Bình Thuận", "Kon Tum", "Gia Lai",
-    "Đắk Lắk", "Đắk Nông", "Lâm Đồng", "Bình Phước", "Tây Ninh",
-    "Bình Dương", "Đồng Nai", "Bà Rịa - Vũng Tàu", "Long An", "Tiền Giang",
-    "Bến Tre", "Trà Vinh", "Vĩnh Long", "Đồng Tháp", "An Giang",
-    "Kiên Giang", "Cà Mau", "Bạc Liêu", "Sóc Trăng", "Hậu Giang",
-    "Vĩnh Phúc", "Bắc Ninh", "Quảng Ninh", "Lạng Sơn", "Cao Bằng",
-    "Bắc Kạn", "Thái Nguyên", "Yên Bái", "Tuyên Quang", "Hà Giang",
-    "Điện Biên", "Lai Châu", "Sơn La", "Hòa Bình", "Phú Thọ",
-    "Lào Cai", "Bắc Giang", "Thái Bình"
+# Vietnamese provinces/cities - Focused on Northern region, especially Hanoi
+# Weight: 50% Hà Nội, 30% other Northern cities, 20% other regions
+hometowns_northern = [
+    "Hà Nội", "Hà Nội", "Hà Nội", "Hà Nội", "Hà Nội",  # 50% weight
+    "Hải Phòng", "Hải Dương", "Hưng Yên", "Nam Định", "Thái Bình",
+    "Ninh Bình", "Bắc Ninh", "Vĩnh Phúc", "Quảng Ninh", "Bắc Giang",
+    "Phú Thọ", "Thái Nguyên", "Hòa Bình"  # 30% other Northern
 ]
 
+hometowns_other = [
+    "TP.HCM", "Đà Nẵng", "Cần Thơ", "Thanh Hóa", "Nghệ An",
+    "Huế", "Quảng Nam", "Khánh Hòa", "Lâm Đồng", "Đồng Nai"  # 20% other regions
+]
+
+# Combine with proper weighting
+hometowns = hometowns_northern * 4 + hometowns_other
+
 def generate_score():
-    """Generate realistic score with distribution"""
-    # 10% Excellent (9.0-10.0)
-    # 30% Good (8.0-8.9)
-    # 40% Average (6.5-7.9)
-    # 15% Below Average (5.0-6.4)
-    # 5% Poor (0-4.9)
+    """
+    Generate realistic score with normal distribution
+    Focused on average scores (6.0-7.5) with spread from low to high
+    
+    Distribution:
+    - 5% Excellent (9.0-10.0)
+    - 20% Good (8.0-8.9)
+    - 50% Average (6.0-7.9) ← CONCENTRATED HERE
+    - 20% Below Average (4.5-5.9)
+    - 5% Poor (3.0-4.4)
+    """
     
     rand = random.random()
-    if rand < 0.10:  # Excellent
-        return round(random.uniform(9.0, 10.0), 2)
-    elif rand < 0.40:  # Good
-        return round(random.uniform(8.0, 8.9), 2)
-    elif rand < 0.80:  # Average
-        return round(random.uniform(6.5, 7.9), 2)
-    elif rand < 0.95:  # Below Average
-        return round(random.uniform(5.0, 6.4), 2)
-    else:  # Poor
-        return round(random.uniform(3.0, 4.9), 2)
+    if rand < 0.05:  # 5% Excellent
+        return round(random.uniform(9.0, 10.0), 1)
+    elif rand < 0.25:  # 20% Good
+        return round(random.uniform(8.0, 8.9), 1)
+    elif rand < 0.75:  # 50% Average (concentrated in middle)
+        # More concentration around 6.5-7.5
+        base = random.uniform(6.0, 7.9)
+        # Add bias towards middle
+        if 6.5 <= base <= 7.5:
+            # Higher probability in this range
+            return round(base, 1)
+        else:
+            # Sometimes re-roll to increase concentration
+            if random.random() < 0.3:
+                return round(random.uniform(6.5, 7.5), 1)
+            return round(base, 1)
+    elif rand < 0.95:  # 20% Below Average
+        return round(random.uniform(4.5, 5.9), 1)
+    else:  # 5% Poor
+        return round(random.uniform(3.0, 4.4), 1)
 
 def generate_birth_date():
     """Generate birth date between 2002-2005"""
