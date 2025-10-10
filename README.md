@@ -361,7 +361,9 @@ python scripts/quick_test_report.py
 
 Reports are saved in `reports/report_YYYYMMDD_HHMMSS/` folder.
 
-## 🎯 Sample Data Import (NEW!)
+## 🎯 Sample Data Management (NEW!)
+
+### 📥 Import Sample Data
 
 Import 100 pre-configured Vietnamese students instantly:
 
@@ -373,13 +375,90 @@ python scripts/import_sample_students.py
 python scripts/import_sample_students.py --clear
 ```
 
-**Sample Student Data:**
-- 100 students with IDs: SV0001 - SV0100
-- Vietnamese names (An, Bình, Cường, Dũng, Hòa...)
-- Vietnamese hometowns (Hà Nội, TP.HCM, Đà Nẵng...)
-- Birth dates: 2002-2004
-- Realistic scores: 7.1-9.8
-- All 3 subjects (Math, Literature, English)
+**Current Sample Data Features:**
+- ✅ 100 students with IDs: SV0001 - SV0100
+- ✅ Vietnamese names with proper accents
+- ✅ Email format: `firstnamelastnamesvXXXX@university.edu.vn` (no accents, includes student ID)
+- ✅ Northern region focused (50% Hà Nội, 30% Northern cities, 20% other regions)
+- ✅ Realistic birth dates: 2002-2005
+- ✅ Score distribution focused on average (6.0-7.5):
+  - 8% Grade A (9.0-10.0) - Excellent students
+  - 22% Grade B (8.0-8.9) - Good students
+  - 45% Grade C (6.0-7.9) - Average students (concentrated)
+  - 18% Grade D (4.0-5.9) - Below average students
+  - 7% Grade F (0-3.9) - Failing students
+- ✅ All 3 subjects with varied performance (Math, Literature, English)
+
+### 🎨 Generate New Sample Data
+
+Customize and generate new sample data with your own requirements:
+
+```bash
+# Generate new 100 students with current settings
+python scripts/generate_beautiful_students.py
+```
+
+**Customization Options:**
+
+Edit `scripts/generate_beautiful_students.py` to customize:
+
+1. **Score Distribution** (lines 50-80):
+   ```python
+   # Adjust percentages for each grade level
+   if rand < 0.08:  # 8% Grade A
+   elif rand < 0.30:  # 22% Grade B
+   elif rand < 0.75:  # 45% Grade C (average)
+   # ... etc
+   ```
+
+2. **Hometown Distribution** (lines 34-44):
+   ```python
+   # Edit city lists and weights
+   hometowns_northern = ["Hà Nội", "Hải Phòng", ...]  # Northern cities
+   hometowns_other = ["TP.HCM", "Đà Nẵng", ...]       # Other regions
+   hometowns = hometowns_northern * 4 + hometowns_other  # 80% North, 20% Other
+   ```
+
+3. **Name Lists** (lines 11-31):
+   ```python
+   first_names_male = ["Minh", "Hoàng", "Nam", ...]
+   first_names_female = ["Linh", "Hương", "Lan", ...]
+   last_names = ["Nguyễn", "Trần", "Lê", ...]
+   ```
+
+4. **Birth Date Range** (lines 82-87):
+   ```python
+   start_date = date(2002, 1, 1)
+   end_date = date(2005, 12, 31)
+   ```
+
+**After customization:**
+```bash
+# 1. Generate new data
+python scripts/generate_beautiful_students.py
+
+# 2. Check statistics in output
+# 3. Import to database
+python scripts/import_sample_students.py --clear
+```
+
+### 📊 Sample Data Statistics
+
+After generating, you'll see statistics like:
+```
+📊 Statistics:
+   Excellent (9.0+): 8 (2.7%)
+   Good (8.0-8.9): 55 (18.3%)
+   Average (6.5-7.9): 149 (49.7%) ← Concentrated here
+   Below Avg (5.0-6.4): 62 (20.7%)
+   Poor (<5.0): 26 (8.7%)
+
+🌍 Top 5 Hometowns:
+   Hà Nội: 30 students (30.0%)
+   Vĩnh Phúc: 8 students (8.0%)
+   Quảng Ninh: 7 students (7.0%)
+   ...
+```
 
 
 

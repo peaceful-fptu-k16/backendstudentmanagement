@@ -215,16 +215,16 @@ class ReportGeneratorService:
         return pd.DataFrame(list(stats.items()), columns=['Metric', 'Value'])
     
     def _generate_all_charts(self, df: pd.DataFrame, report_folder: str) -> List[Dict[str, str]]:
-        """Generate all visualization charts"""
+        """Generate selected visualization charts (1, 3, 4, 6, 10, 11, 13, 14, 15, 17, 18, 20)"""
         charts = []
         
         # 1. Score Distribution (Histogram)
         chart_path = self._create_score_distribution_chart(df, report_folder)
         charts.append({"name": "score_distribution", "path": chart_path})
         
-        # 2. Grade Distribution (Pie Chart)
-        chart_path = self._create_grade_pie_chart(df, report_folder)
-        charts.append({"name": "grade_distribution", "path": chart_path})
+        # 2. Grade Distribution (Pie Chart) - SKIPPED
+        # chart_path = self._create_grade_pie_chart(df, report_folder)
+        # charts.append({"name": "grade_distribution", "path": chart_path})
         
         # 3. Subject Comparison (Bar Chart)
         chart_path = self._create_subject_comparison_chart(df, report_folder)
@@ -234,68 +234,68 @@ class ReportGeneratorService:
         chart_path = self._create_correlation_heatmap(df, report_folder)
         charts.append({"name": "correlation_heatmap", "path": chart_path})
         
-        # 5. Hometown Performance (Bar Chart)
-        chart_path = self._create_hometown_performance_chart(df, report_folder)
-        charts.append({"name": "hometown_performance", "path": chart_path})
+        # 5. Hometown Performance (Bar Chart) - SKIPPED
+        # chart_path = self._create_hometown_performance_chart(df, report_folder)
+        # charts.append({"name": "hometown_performance", "path": chart_path})
         
         # 6. Box Plot for Scores
         chart_path = self._create_score_boxplot(df, report_folder)
         charts.append({"name": "score_boxplot", "path": chart_path})
         
-        # 7. Top 10 Students (Bar Chart)
-        chart_path = self._create_top_students_chart(df, report_folder)
-        charts.append({"name": "top_students", "path": chart_path})
+        # 7. Top 10 Students (Bar Chart) - SKIPPED
+        # chart_path = self._create_top_students_chart(df, report_folder)
+        # charts.append({"name": "top_students", "path": chart_path})
         
-        # 8. Score Distribution by Subject (Violin Plot)
-        chart_path = self._create_violin_plot(df, report_folder)
-        charts.append({"name": "violin_plot", "path": chart_path})
+        # 8. Score Distribution by Subject (Violin Plot) - SKIPPED
+        # chart_path = self._create_violin_plot(df, report_folder)
+        # charts.append({"name": "violin_plot", "path": chart_path})
         
-        # 9. Performance Trends (if age data available)
-        if 'Age' in df.columns and df['Age'].notna().any():
-            chart_path = self._create_age_performance_chart(df, report_folder)
-            charts.append({"name": "age_performance", "path": chart_path})
+        # 9. Performance Trends (if age data available) - SKIPPED
+        # if 'Age' in df.columns and df['Age'].notna().any():
+        #     chart_path = self._create_age_performance_chart(df, report_folder)
+        #     charts.append({"name": "age_performance", "path": chart_path})
         
         # 10. Grade Distribution by Hometown
         chart_path = self._create_grade_by_hometown_chart(df, report_folder)
         charts.append({"name": "grade_by_hometown", "path": chart_path})
         
-        # 11. Score Range Analysis (NEW!)
+        # 11. Score Range Analysis
         chart_path = self._create_score_range_analysis(df, report_folder)
         charts.append({"name": "score_range_analysis", "path": chart_path})
         
-        # 12. Average Score by Hometown (Horizontal Bar) (NEW!)
-        chart_path = self._create_avg_score_by_hometown(df, report_folder)
-        charts.append({"name": "avg_score_by_hometown", "path": chart_path})
+        # 12. Average Score by Hometown (Horizontal Bar) - SKIPPED
+        # chart_path = self._create_avg_score_by_hometown(df, report_folder)
+        # charts.append({"name": "avg_score_by_hometown", "path": chart_path})
         
-        # 13. Score Density Plot (NEW!)
+        # 13. Score Density Plot
         chart_path = self._create_score_density_plot(df, report_folder)
         charts.append({"name": "score_density", "path": chart_path})
         
-        # 14. Performance Radar Chart (Top 5 Students) (NEW!)
+        # 14. Performance Radar Chart (Top 5 Students)
         chart_path = self._create_performance_radar(df, report_folder)
         charts.append({"name": "performance_radar", "path": chart_path})
         
-        # 15. Score Scatter Matrix (NEW!)
+        # 15. Score Scatter Matrix
         chart_path = self._create_score_scatter_matrix(df, report_folder)
         charts.append({"name": "score_scatter_matrix", "path": chart_path})
         
-        # 16. Grade Count by Score Range (NEW!)
-        chart_path = self._create_grade_count_chart(df, report_folder)
-        charts.append({"name": "grade_count", "path": chart_path})
+        # 16. Grade Count by Score Range - SKIPPED
+        # chart_path = self._create_grade_count_chart(df, report_folder)
+        # charts.append({"name": "grade_count", "path": chart_path})
         
-        # 17. Subject Performance Comparison (Line Chart) (NEW!)
+        # 17. Subject Performance Comparison (Line Chart)
         chart_path = self._create_subject_line_comparison(df, report_folder)
         charts.append({"name": "subject_line_comparison", "path": chart_path})
         
-        # 18. Cumulative Score Distribution (NEW!)
+        # 18. Cumulative Score Distribution
         chart_path = self._create_cumulative_distribution(df, report_folder)
         charts.append({"name": "cumulative_distribution", "path": chart_path})
         
-        # 19. Heatmap of Student Performance (NEW!)
-        chart_path = self._create_student_performance_heatmap(df, report_folder)
-        charts.append({"name": "student_performance_heatmap", "path": chart_path})
+        # 19. Heatmap of Student Performance - SKIPPED
+        # chart_path = self._create_student_performance_heatmap(df, report_folder)
+        # charts.append({"name": "student_performance_heatmap", "path": chart_path})
         
-        # 20. Statistical Summary Chart (NEW!)
+        # 20. Statistical Summary Chart
         chart_path = self._create_statistical_summary(df, report_folder)
         charts.append({"name": "statistical_summary", "path": chart_path})
         
