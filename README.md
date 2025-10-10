@@ -2,15 +2,26 @@
 
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104%2B-green)](https://fastapi.tiangolo.com)
-[![SQLModel](https://img.shields.io/badge/SQLModel-0.0.14-red)](https://sqlmodel.tiangolo.com)
+[![SQLModel](https://img.shields.io/badge/SQLModel-0.0.14-r## 📚 Documentation
+
+- **🎨 Seaborn Integration**: `SEABORN_QUICKSTART.md` | `SEABORN_GUIDE.md`
+- **🐼 Pandas Integration**: `PANDAS_INTEGRATION_GUIDE.md`
+- **📖 Daily Logging System**: `docs/DAILY_LOGGING_SYSTEM.md`
+- **📊 Logging Report**: `docs/LOGGING_REPORT.md`
+- **📈 Crawler Report Guide**: `CRAWLER_REPORT_GUIDE.md` ⭐ NEW
+- **📊 20 Charts Guide**: `CHART_GUIDE.md` ⭐ NEW - Complete guide for all 20 charts
+- **🔄 Update Summary**: `UPDATE_SUMMARY.md` ⭐ NEW
+- **🔧 GitHub Copilot Instructions**: `.github/copilot/instructions.md`s://sqlmodel.tiangolo.com)
 [![XML](https://img.shields.io/badge/Response-XML-orange)](https://www.w3.org/XML/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-2.1.0-brightgreen.svg)](README.md)
 
-A comprehensive **FastAPI-based backend system** for managing student records with advanced logging, analytics, and data processing capabilities.
+A comprehensive **FastAPI-based backend system** for managing student records with advanced logging, analytics, comprehensive reporting, and data processing capabilities.
 
 ## ⚠️ **IMPORTANT: API now returns XML instead of JSON!**
 
 **Version 2.0.0** - All API endpoints now return **XML format** responses.  
+**Version 2.1.0** - Added comprehensive report generation with 10 charts and sample data import! ⭐  
 📖 Read [XML_API_MIGRATION.md](XML_API_MIGRATION.md) for migration guide.
 
 ## ✨ Features
@@ -25,6 +36,8 @@ A comprehensive **FastAPI-based backend system** for managing student records wi
 - 🔄 **CORS Support** - Ready for frontend integration
 - 📈 **Performance Monitoring** - Request timing and metrics
 - 🔄 **XML Responses** - All endpoints return XML format (NEW in v2.0)
+- 📋 **Comprehensive Reports** - Auto-generated Excel reports with 20+ charts (NEW!)
+- 🎯 **Sample Data Import** - 100 pre-configured Vietnamese students for testing (NEW!)
 
 ## 🚀 Quick Start
 
@@ -36,14 +49,17 @@ cd student-management-backend
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Start development server
+# 3. Import 100 sample students (optional)
+python scripts/import_sample_students.py
+
+# 4. Start development server
 python scripts/run.py
 
-# 4. Access API documentation
-# Open http://localhost:8000/docs
+# 5. Access API documentation
+# Open http://localhost:8001/docs
 
-# 5. Test XML responses
-python test_xml_api.py
+# 6. Generate comprehensive report (optional)
+# POST http://localhost:8001/api/v1/crawler/generate-report?limit=100
 ```
 
 ## 🔄 XML Response Format
@@ -76,17 +92,40 @@ All API endpoints now return XML instead of JSON:
 student-management-backend/
 ├── app/                    # 🚀 Main application
 │   ├── api/endpoints/     # 🛣️  API route handlers (XML responses)
+│   │   ├── students.py   # Student CRUD operations
+│   │   ├── analytics.py  # Analytics endpoints
+│   │   ├── crawler.py    # Crawler + Report generation ⭐ NEW
+│   │   └── export.py     # Export functionality
 │   ├── core/              # ⚙️  Core utilities (config, logging, db)
 │   ├── crud/              # 🗄️  Database operations
 │   ├── models/            # 📊 Data models (SQLModel)
 │   ├── services/          # 🔧 Business logic services
+│   │   ├── crawler_service.py
+│   │   ├── data_service.py
+│   │   ├── export_service.py
+│   │   └── report_generator_service.py  ⭐ NEW (646 lines)
 │   ├── utils/             # 🛠️  Utilities (XML builders, serialization)
 │   └── main.py            # 🎯 FastAPI application entry
+├── data/                  # 📦 Sample data ⭐ NEW
+│   └── sample_students_100.json  # 100 Vietnamese students
 ├── docs/                  # 📖 Documentation files
 ├── scripts/               # 🛠️  Utility scripts
+│   ├── run.py            # Start server
+│   ├── import_sample_students.py  ⭐ NEW (Import 100 students)
+│   ├── test_crawler_with_reports.py
+│   ├── quick_test_report.py
+│   ├── check_db.py
+│   └── ...
 ├── tests/                 # 🧪 Test files
 ├── logs/                  # 📊 Daily logging (auto-created)
-└── requirements.txt       # 📦 Python dependencies
+├── reports/               # 📈 Auto-generated reports ⭐ NEW
+│   └── report_YYYYMMDD_HHMMSS/
+│       ├── students_data.xlsx      # Excel with 6 sheets
+│       ├── summary.html            # HTML summary
+│       └── *.png                   # 10 charts
+├── requirements.txt       # 📦 Python dependencies
+├── CRAWLER_REPORT_GUIDE.md  ⭐ NEW
+└── UPDATE_SUMMARY.md        ⭐ NEW
 ```
 
 ## 🌐 API Endpoints
@@ -116,6 +155,9 @@ GET    /api/v1/analytics/summary    # Summary statistics
 GET    /api/v1/analytics/score-comparison    # Score analysis
 GET    /api/v1/analytics/hometown-analysis   # Geographic insights
 GET    /api/v1/export               # Export data (Excel/CSV/XML)
+POST   /api/v1/crawler/crawl        # Crawl data with report generation
+POST   /api/v1/crawler/crawl-and-import     # Crawl, import & generate report
+POST   /api/v1/crawler/generate-report      # Generate comprehensive report (10 charts + Excel)
 ```
 
 ### Visualizations (Seaborn) 🎨
@@ -193,6 +235,17 @@ logs/
 │   ├── export.log       # Export operations
 │   └── errors.log       # Error tracking
 └── 2025-09-30/          # Next day folder
+
+reports/                  # Auto-generated reports (NEW!)
+└── report_20251010_123045/
+    ├── students_data.xlsx         # Excel with 6 sheets
+    ├── summary.html               # HTML summary
+    ├── 01_score_distribution.png  # 10 visualization charts
+    ├── 02_grade_distribution.png
+    └── ...
+
+data/                     # Sample data (NEW!)
+└── sample_students_100.json  # 100 pre-configured students
 ```
 
 **Log Format Example:**
@@ -211,14 +264,22 @@ logs/
 ## 🧪 Testing
 
 ```bash
+# Import sample data
+python scripts/import_sample_students.py          # Import 100 students
+python scripts/import_sample_students.py --clear  # Clear DB and reimport
+
 # Run basic tests
 python tests/test_api.py
 
 # Test specific functionality
 python tests/simple_test.py
 
-# Check logging system
-python tests/test_logging.py
+# Test report generation
+python scripts/test_crawler_with_reports.py
+python scripts/quick_test_report.py
+
+# Check database
+python scripts/check_db.py
 ```
 
 ## 🐳 Docker Deployment
@@ -238,7 +299,9 @@ docker run -p 8000:8000 student-management
 - **🐼 Pandas Integration**: `PANDAS_INTEGRATION_GUIDE.md`
 - **📖 Daily Logging System**: `docs/DAILY_LOGGING_SYSTEM.md`
 - **📊 Logging Report**: `docs/LOGGING_REPORT.md`
-- **🔧 GitHub Copilot Instructions**: `.github/copilot/instructions.md`
+- **� Crawler Report Guide**: `CRAWLER_REPORT_GUIDE.md` ⭐ NEW
+- **🔄 Update Summary**: `UPDATE_SUMMARY.md` ⭐ NEW
+- **�🔧 GitHub Copilot Instructions**: `.github/copilot/instructions.md`
 
 ## 🎨 Visualization Dashboard
 
@@ -251,6 +314,74 @@ python scripts/run.py
 # Open dashboard in browser
 start visualization_dashboard.html
 ```
+
+## 📊 Comprehensive Report Generation (NEW!)
+
+The system now automatically generates comprehensive reports with **10 charts** and **Excel files**:
+
+### 📈 Report Contents:
+- **Excel File** with 6 sheets:
+  - 📝 Students (complete data)
+  - 📊 Statistics (summary metrics)
+  - 📊 Grade Distribution
+  - 🌍 Hometown Analysis
+  - 🏆 Top Performers
+  - 📐 Subject Analysis
+
+- **20 Visualization Charts**:
+  1. 📊 Score Distribution (3-panel histogram)
+  2. 🥧 Grade Distribution (pie chart)
+  3. 📊 Subject Comparison (bar chart)
+  4. 🔥 Correlation Heatmap
+  5. 🌍 Hometown Performance (top 15)
+  6. 📦 Score Boxplot
+  7. 🏆 Top 10 Students
+  8. 🎻 Violin Plot
+  9. 👥 Age Performance (if available)
+  10. 📊 Grade by Hometown (stacked bar)
+  11. 📊 **Score Range Analysis** ⭐ NEW
+  12. 📊 **Avg Score by Hometown** ⭐ NEW
+  13. 📈 **Score Density Plot** ⭐ NEW
+  14. 🎯 **Performance Radar** ⭐ NEW
+  15. 🔢 **Score Scatter Matrix** ⭐ NEW
+  16. 🍩 **Grade Count Donut** ⭐ NEW
+  17. 📈 **Subject Line Comparison** ⭐ NEW
+  18. 📊 **Cumulative Distribution** ⭐ NEW
+  19. 🔥 **Student Performance Heatmap** ⭐ NEW
+  20. 📊 **Statistical Summary Dashboard** ⭐ NEW
+
+### 🚀 Generate Report:
+```bash
+# Via API
+POST http://localhost:8001/api/v1/crawler/generate-report?limit=100
+
+# Or use test script
+python scripts/quick_test_report.py
+```
+
+Reports are saved in `reports/report_YYYYMMDD_HHMMSS/` folder.
+
+## 🎯 Sample Data Import (NEW!)
+
+Import 100 pre-configured Vietnamese students instantly:
+
+```bash
+# Import 100 students (skip duplicates)
+python scripts/import_sample_students.py
+
+# Clear database and import fresh data
+python scripts/import_sample_students.py --clear
+```
+
+**Sample Student Data:**
+- 100 students with IDs: SV0001 - SV0100
+- Vietnamese names (An, Bình, Cường, Dũng, Hòa...)
+- Vietnamese hometowns (Hà Nội, TP.HCM, Đà Nẵng...)
+- Birth dates: 2002-2004
+- Realistic scores: 7.1-9.8
+- All 3 subjects (Math, Literature, English)
+
+
 
 ## 🤝 Contributing
 
@@ -270,7 +401,39 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 📖 **Documentation**: Check `/docs` folder
 - 💬 **API Testing**: Visit `/docs` endpoint
 - 🔍 **Logs**: Check `logs/` directory for debugging
+- 📊 **Reports**: Check `reports/` directory for generated reports
+
+## 🎯 Quick Tips
+
+### Generate Full Report
+```bash
+# 1. Import sample data
+python scripts/import_sample_students.py
+
+# 2. Start server
+python scripts/run.py
+
+# 3. Generate report (in another terminal)
+# POST http://localhost:8001/api/v1/crawler/generate-report?limit=100
+```
+
+### Test Report Generation
+```bash
+python scripts/quick_test_report.py
+```
+
+### Reset Database
+```bash
+python scripts/import_sample_students.py --clear
+```
+
+### Check Database Status
+```bash
+python scripts/check_db.py
+```
 
 ---
 
 **🎯 Built with FastAPI, SQLModel, and ❤️ for education management**
+
+**✨ Version 2.1.0** - Now with comprehensive reporting and sample data import!

@@ -138,7 +138,9 @@ class StudentXMLBuilder:
             ET.SubElement(system, "updated_at").text = str(student_data.get("updated_at"))
         
         ET.indent(root, space="  ", level=0)
-        return ET.tostring(root, encoding='unicode', xml_declaration=True)
+        # Return XML as UTF-8 string with proper declaration
+        xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+        return xml_bytes.decode('utf-8')
     
     @staticmethod
     def students_to_xml(students_data: List[Dict[str, Any]], pagination: Optional[Dict[str, Any]] = None) -> str:
@@ -163,8 +165,16 @@ class StudentXMLBuilder:
             # Basic info
             ET.SubElement(student_elem, "id").text = str(student.get("id", ""))
             ET.SubElement(student_elem, "student_id").text = str(student.get("student_id", ""))
+            
+            # Personal info
+            ET.SubElement(student_elem, "first_name").text = student.get("first_name", "")
+            ET.SubElement(student_elem, "last_name").text = student.get("last_name", "")
             ET.SubElement(student_elem, "full_name").text = student.get("full_name", "")
             
+            if student.get("email"):
+                ET.SubElement(student_elem, "email").text = student.get("email")
+            if student.get("birth_date"):
+                ET.SubElement(student_elem, "birth_date").text = str(student.get("birth_date"))
             if student.get("hometown"):
                 ET.SubElement(student_elem, "hometown").text = student.get("hometown")
             
@@ -179,9 +189,17 @@ class StudentXMLBuilder:
                 ET.SubElement(student_elem, "average_score").text = str(student.get("average_score"))
             if student.get("grade"):
                 ET.SubElement(student_elem, "grade").text = student.get("grade")
+            
+            # System info (optional)
+            if student.get("created_at"):
+                ET.SubElement(student_elem, "created_at").text = str(student.get("created_at"))
+            if student.get("updated_at"):
+                ET.SubElement(student_elem, "updated_at").text = str(student.get("updated_at"))
         
         ET.indent(root, space="  ", level=0)
-        return ET.tostring(root, encoding='unicode', xml_declaration=True)
+        # Return XML as UTF-8 string with proper declaration
+        xml_bytes = ET.tostring(root, encoding='utf-8', xml_declaration=True)
+        return xml_bytes.decode('utf-8')
     
     @staticmethod
     def bulk_import_result_to_xml(result: Dict[str, Any]) -> str:

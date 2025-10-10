@@ -102,8 +102,8 @@ def get_students(
     xml_content = StudentXMLBuilder.students_to_xml(student_responses, pagination_info)
     
     return Response(
-        content=xml_content,
-        media_type="application/xml"
+        content=xml_content.encode('utf-8'),
+        media_type="application/xml; charset=utf-8"
     )
 
 @router.post("", status_code=status.HTTP_201_CREATED)
