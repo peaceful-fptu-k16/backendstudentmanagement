@@ -22,12 +22,6 @@ class AnalyticsResponse(SQLModel):
     grade_distribution: dict
     subject_comparison: dict
 
-class ExportRequest(SQLModel):
-    """Export request schema"""
-    format: str = "csv"  # csv, excel, xml
-    filters: Optional[dict] = None
-    include_analytics: bool = False
-
 class CrawlRequest(SQLModel):
     """Crawl request schema"""
     url: str

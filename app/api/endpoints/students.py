@@ -3,7 +3,6 @@ Student Management API Endpoints
 
 This module provides REST API endpoints for managing student records including:
 - CRUD operations (Create, Read, Update, Delete)
-- Bulk import from Excel/CSV files
 - Advanced analytics using Pandas
 - Data filtering and pagination
 - Sample data generation
@@ -12,13 +11,13 @@ All endpoints return XML format responses.
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.responses import Response
 from sqlmodel import Session
 
 # Core dependencies and utilities
 from app.core.dependencies import get_db
-from app.core.exceptions import StudentNotFoundError, StudentAlreadyExistsError, BulkImportError
+from app.core.exceptions import StudentNotFoundError, StudentAlreadyExistsError
 from app.core.pagination import PaginationParams
 
 # CRUD operations and models
@@ -438,89 +437,6 @@ def delete_student(
     
     # Return 204 No Content (FastAPI handles empty response automatically)
 
-@router.post("/bulk-import")
-async def bulk_import_students(
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db)
-):
-    """
-    Bulk import students from Excel or CSV file
-    
-    Request:
-        file: Upload file in Excel (.xlsx, .xls) or CSV (.csv) format
-        Expected columns: student_id, first_name, last_name (or full_name),
-                         email, birth_date, hometown, math_score, 
-                         literature_score, english_score
-    
-    Returns:
-        XML response with import summary:
-            - total_processed: Number of rows processed
-            - successful_imports: Number of students created
-            - failed_imports: Number of failures
-            - errors: List of error messages with row numbers
-            - imported_student_ids: List of successfully imported student IDs
-    
-    Raises:
-        400: Invalid file format or processing error
-    """
-    
-    # Validate uploaded file extension
-    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File must be Excel (.xlsx, .xls) or CSV (.csv) format"
-        )
-    
-    try:
-        # Read uploaded file content into memory
-        content = await file.read()
-        
-        # Parse file into pandas DataFrame based on file type
-        if file.filename.endswith('.csv'):
-            df = DataService.parse_csv_file(content)
-        else:
-            df = DataService.parse_excel_file(content)
-        
-        # Clean and standardize DataFrame (handle NaN, convert types, etc.)
-        df_clean = DataService.clean_dataframe(df)
-        
-        # Convert DataFrame rows to StudentCreate objects
-        students_data, conversion_errors = DataService.dataframe_to_students(df_clean)
-        
-        # Abort if no valid student data found
-        if not students_data:
-            raise BulkImportError("No valid student data found in file", conversion_errors)
-        
-        # Perform bulk database insert with error handling
-        created_students, creation_errors = student_crud.bulk_create(db=db, students_in=students_data)
-        
-        # Combine conversion and creation errors
-        all_errors = conversion_errors + creation_errors
-        
-        # Build summary response
-        result = {
-            "total_processed": len(students_data),
-            "successful_imports": len(created_students),
-            "failed_imports": len(students_data) - len(created_students),
-            "errors": all_errors,
-            "imported_student_ids": [s.student_id for s in created_students]
-        }
-        
-        # Convert result to XML and return
-        xml_content = StudentXMLBuilder.bulk_import_result_to_xml(result)
-        return Response(content=xml_content, media_type="application/xml")
-        
-    except Exception as e:
-        # Re-raise BulkImportError as-is for proper error handling
-        if isinstance(e, BulkImportError):
-            raise e
-        # Wrap other exceptions in HTTP 400
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to process file: {str(e)}"
-        )
-
 @router.post("/generate-sample")
 def generate_sample_students(
     count: int = Query(100, ge=1, le=1000, description="Number of students to generate"),
@@ -564,7 +480,7 @@ def generate_sample_students(
         }
         
         # Convert result to XML and return
-        xml_content = StudentXMLBuilder.bulk_import_result_to_xml(result)
+        xml_content = StudentXMLBuilder.generation_result_to_xml(result)
         return Response(content=xml_content, media_type="application/xml")
         
     except Exception as e:

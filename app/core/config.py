@@ -62,6 +62,18 @@ class Settings:
     CRAWLER_USER_AGENT: str = "Student Management Crawler 1.0"  # User-Agent header
     CRAWLER_DELAY: float = 1.0  # Delay in seconds between consecutive requests
     
+    # ============================================================================
+    # CORS Settings
+    # ============================================================================
+    BACKEND_CORS_ORIGINS: list = [
+        "http://localhost:3000",
+        "http://localhost:8080",
+        "http://localhost:5500",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:5500",
+    ]  # Allowed origins for CORS
+    
     def __init__(self):
         """
         Initialize settings and create required directories

@@ -58,11 +58,11 @@ def generate_score():
     """
     
     rand = random.random()
-    if rand < 0.08:  # 8% Grade A (Excellent)
+    if rand < 0.18:  # 18% Grade A (Excellent)
         return round(random.uniform(9.0, 10.0), 1)
-    elif rand < 0.30:  # 22% Grade B (Good)
+    elif rand < 0.30:  # 12% Grade B (Good)
         return round(random.uniform(8.0, 8.9), 1)
-    elif rand < 0.75:  # 45% Grade C (Average - concentrated in middle)
+    elif rand < 0.65:  # 35% Grade C (Average - concentrated in middle)
         # More concentration around 6.5-7.5
         base = random.uniform(6.0, 7.9)
         # Add bias towards middle
@@ -73,7 +73,7 @@ def generate_score():
             if random.random() < 0.3:
                 return round(random.uniform(6.5, 7.5), 1)
             return round(base, 1)
-    elif rand < 0.93:  # 18% Grade D (Below Average)
+    elif rand < 0.83:  # 18% Grade D (Below Average)
         return round(random.uniform(4.0, 5.9), 1)
     else:  # 7% Grade F (Fail)
         return round(random.uniform(0.5, 3.9), 1)

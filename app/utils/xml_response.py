@@ -202,13 +202,13 @@ class StudentXMLBuilder:
         return xml_bytes.decode('utf-8')
     
     @staticmethod
-    def bulk_import_result_to_xml(result: Dict[str, Any]) -> str:
-        """Convert bulk import result to XML"""
-        root = ET.Element("bulk_import_result")
+    def generation_result_to_xml(result: Dict[str, Any]) -> str:
+        """Convert sample generation result to XML"""
+        root = ET.Element("generation_result")
         
-        ET.SubElement(root, "total_processed").text = str(result.get("total_processed", 0))
-        ET.SubElement(root, "successful_imports").text = str(result.get("successful_imports", 0))
-        ET.SubElement(root, "failed_imports").text = str(result.get("failed_imports", 0))
+        ET.SubElement(root, "total_generated").text = str(result.get("total_generated", 0))
+        ET.SubElement(root, "successful_inserts").text = str(result.get("successful_inserts", 0))
+        ET.SubElement(root, "failed_inserts").text = str(result.get("failed_inserts", 0))
         
         # Errors
         if result.get("errors"):
@@ -217,10 +217,10 @@ class StudentXMLBuilder:
                 error_elem = ET.SubElement(errors_elem, "error")
                 error_elem.text = str(error)
         
-        # Imported IDs
-        if result.get("imported_student_ids"):
-            ids_elem = ET.SubElement(root, "imported_student_ids")
-            for student_id in result.get("imported_student_ids", []):
+        # Generated student IDs
+        if result.get("student_ids"):
+            ids_elem = ET.SubElement(root, "student_ids")
+            for student_id in result.get("student_ids", []):
                 ET.SubElement(ids_elem, "student_id").text = str(student_id)
         
         ET.indent(root, space="  ", level=0)

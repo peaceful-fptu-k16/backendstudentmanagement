@@ -158,9 +158,24 @@ def import_students(clear_existing=False):
     
     # Show next steps
     print("\n📌 Next Steps:")
-    print("   1. Start server: python -m uvicorn app.main:app --host 0.0.0.0 --port 8001")
-    print("   2. Generate report: POST http://127.0.0.1:8001/api/v1/crawler/generate-report")
-    print("   3. View API docs: http://127.0.0.1:8001/docs")
+    print("   1. Start server:")
+    print("      python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload")
+    print()
+    print("   2. Generate report (PowerShell):")
+    print("      $body = @{")
+    print('          current_url = "http://127.0.0.1:5500/index.html"')
+    print('          frontend_base_url = "http://127.0.0.1:5500"')
+    print(f'          timestamp = "{datetime.now().isoformat()}"')
+    print("      } | ConvertTo-Json")
+    print()
+    print('      Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/crawler/generate-report" `')
+    print("          -Method POST -Body $body -ContentType 'application/json'")
+    print()
+    print("   3. Or use test script:")
+    print("      python scripts/test_generate_report.py")
+    print()
+    print("   4. View API docs:")
+    print("      http://127.0.0.1:8000/docs")
     print()
 
 
