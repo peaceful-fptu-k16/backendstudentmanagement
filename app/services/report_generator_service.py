@@ -61,12 +61,6 @@ class ReportGeneratorService:
         if not students:
             raise ValueError("No student data provided for report generation")
         
-        # Debug logging
-        print(f"DEBUG: Type of students: {type(students)}")
-        if students:
-            print(f"DEBUG: Type of first student: {type(students[0])}")
-            print(f"DEBUG: First student: {students[0]}")
-        
         # Create report folder
         report_folder = self.create_report_folder(prefix=report_type)
         
@@ -939,7 +933,7 @@ class ReportGeneratorService:
         charts: List[Dict[str, str]]
     ) -> str:
         """Generate HTML summary file"""
-        summary_path = os.path.join(report_folder, "README.html")
+        summary_path = os.path.join(report_folder, "student_report.html")
         
         html_content = f"""
 <!DOCTYPE html>

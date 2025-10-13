@@ -14,6 +14,21 @@ venv.bak/
 *.sqlite
 *.sqlite3
 
+# Reports  
+reports/
+reports/*.html
+reports/*.xlsx
+
+# Test files
+test_*.py
+test_*.html
+
+# Logs
+logs/
+
+# Uploads
+uploads/
+
 # IDE
 .vscode/
 .idea/

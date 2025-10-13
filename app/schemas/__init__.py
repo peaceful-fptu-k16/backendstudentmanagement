@@ -33,3 +33,9 @@ class CrawlRequest(SQLModel):
     url: str
     parse_type: str = "student_list"  # student_list, single_student
     output_format: str = "excel"  # excel, csv, json
+
+class GenerateReportRequest(SQLModel):
+    """Generate report request schema from frontend"""
+    current_url: str
+    frontend_base_url: str
+    timestamp: str
