@@ -86,9 +86,9 @@ async def crawl_website(
             report_type="url_crawl",
             additional_info={
                 "source": "url_crawl",
-                "crawl_url": request.current_url,
-                "frontend_base_url": request.frontend_base_url,
-                "crawl_timestamp": request.timestamp,
+                "crawl_url": crawl_request.url,
+                "frontend_base_url": getattr(crawl_request, 'frontend_base_url', crawl_request.url),
+                "crawl_timestamp": getattr(crawl_request, 'timestamp', None),
                 "total_students": len(student_objects)
             }
         )
@@ -96,7 +96,7 @@ async def crawl_website(
         return {
             "success": True,
             "message": f"Successfully crawled and generated report for {len(student_objects)} students",
-            "crawl_url": request.current_url,
+            "crawl_url": crawl_request.url,
             "data_source": "url_crawl",
             "found_records": len(raw_data),
             "valid_students": len(students_data),

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import requests
 import time
 from typing import List, Dict, Any, Optional
@@ -167,10 +168,12 @@ class CrawlerService:
                             # This is cross-port call (FE -> BE), safe to test
                             pass
                         
-                        test_response = self.session.get(f"{test_api_url}/api/v1/students", timeout=5)
-                        if test_response.status_code == 200:
-                            api_base_url = test_api_url
-                            break
+                        # Only test if not already found API
+                        if not api_base_url:
+                            test_response = self.session.get(f"{test_api_url}/api/v1/students?limit=1", timeout=5)
+                            if test_response.status_code == 200:
+                                api_base_url = test_api_url
+                                break
                     except Exception as e:
                         continue
             else:
@@ -229,16 +232,8 @@ class CrawlerService:
                                 current_students = api_data['items']
                                 total_count = api_data.get('total', 0)
                             else:
-                                # Fallback: try with higher limit for simple API
-                                if page == 1:
-                                    fallback_response = self.session.get(f"{api_base_url}/api/v1/students?limit=10000", timeout=60)
-                                    if fallback_response.status_code == 200:
-                                        fallback_data = fallback_response.json()
-                                        current_students = fallback_data if isinstance(fallback_data, list) else []
-                                    else:
-                                        current_students = []
-                                else:
-                                    current_students = []
+                                # Simple array response - treat as direct list
+                                current_students = api_data if isinstance(api_data, list) else []
                         else:
                             current_students = api_data if isinstance(api_data, list) else []
                         

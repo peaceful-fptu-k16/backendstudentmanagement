@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Report Generator Service
 Generates comprehensive reports with Excel files and visualization charts
@@ -110,28 +111,40 @@ class ReportGeneratorService:
                     'grade': student.grade
                 }
             
+            # Calculate proper average score and grade using Student methods
+            calculated_average = student.get_average_score() if hasattr(student, 'get_average_score') else None
+            calculated_grade = student.get_grade() if hasattr(student, 'get_grade') else None
+            
+            # Format birth date properly if available
+            birth_date_formatted = None
+            if student_dict.get('birth_date'):
+                birth_date = student_dict.get('birth_date')
+                if hasattr(birth_date, 'strftime'):
+                    birth_date_formatted = birth_date.strftime('%Y-%m-%d')
+                else:
+                    birth_date_formatted = str(birth_date) if birth_date else None
+            
             data.append({
                 'Student ID': student_dict.get('student_id'),
                 'First Name': student_dict.get('first_name'),
                 'Last Name': student_dict.get('last_name'),
-                'Full Name': f"{student_dict.get('first_name', '')} {student_dict.get('last_name', '')}",
+                'Full Name': f"{student_dict.get('first_name', '')} {student_dict.get('last_name', '')}".strip(),
                 'Email': student_dict.get('email'),
-                'Birth Date': student_dict.get('birth_date'),
-                'Age': student_dict.get('age') if 'age' in student_dict else None,
+                'Birth Date': birth_date_formatted,
                 'Hometown': student_dict.get('hometown'),
-                'Math Score': float(student_dict.get('math_score', 0)) if student_dict.get('math_score') is not None else 0.0,
-                'Literature Score': float(student_dict.get('literature_score', 0)) if student_dict.get('literature_score') is not None else 0.0,
-                'English Score': float(student_dict.get('english_score', 0)) if student_dict.get('english_score') is not None else 0.0,
-                'Average Score': float(student_dict.get('average_score', 0)) if student_dict.get('average_score') is not None else 0.0,
-                'Grade': student_dict.get('grade', 'N/A')
+                'Math Score': float(student_dict.get('math_score')) if student_dict.get('math_score') is not None else None,
+                'Literature Score': float(student_dict.get('literature_score')) if student_dict.get('literature_score') is not None else None,
+                'English Score': float(student_dict.get('english_score')) if student_dict.get('english_score') is not None else None,
+                'Average Score': round(calculated_average, 2) if calculated_average is not None else None,
+                'Grade': calculated_grade
             })
         
         df = pd.DataFrame(data)
         
-        # Ensure numeric columns are float type
+        # Ensure numeric columns are float type, keep None for missing scores
         numeric_columns = ['Math Score', 'Literature Score', 'English Score', 'Average Score']
         for col in numeric_columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
+            df[col] = pd.to_numeric(df[col], errors='coerce')
         
         return df
     
@@ -157,18 +170,22 @@ class ReportGeneratorService:
             grade_dist.columns = ['Grade', 'Count']
             grade_dist.to_excel(writer, sheet_name='Grade Distribution', index=False)
             
-            # Hometown analysis sheet
-            hometown_stats = df.groupby('Hometown').agg({
-                'Student ID': 'count',
-                'Average Score': 'mean'
-            }).reset_index()
-            hometown_stats.columns = ['Hometown', 'Student Count', 'Avg Score']
-            hometown_stats = hometown_stats.sort_values('Avg Score', ascending=False)
-            hometown_stats.to_excel(writer, sheet_name='Hometown Analysis', index=False)
+            # Hometown analysis sheet  
+            df_with_hometown = df[df['Hometown'].notna()]  # Filter out None hometowns
+            if len(df_with_hometown) > 0:
+                hometown_stats = df_with_hometown.groupby('Hometown').agg({
+                    'Student ID': 'count',
+                    'Average Score': lambda x: x.dropna().mean() if not x.dropna().empty else None
+                }).reset_index()
+                hometown_stats.columns = ['Hometown', 'Student Count', 'Avg Score']
+                hometown_stats = hometown_stats.sort_values('Student Count', ascending=False)
+                hometown_stats.to_excel(writer, sheet_name='Hometown Analysis', index=False)
             
-            # Top performers sheet
-            top_performers = df.nlargest(20, 'Average Score')[['Student ID', 'Full Name', 'Average Score', 'Grade']]
-            top_performers.to_excel(writer, sheet_name='Top Performers', index=False)
+            # Top performers sheet - only students with complete scores
+            df_complete = df.dropna(subset=['Average Score'])
+            if len(df_complete) > 0:
+                top_performers = df_complete.nlargest(min(20, len(df_complete)), 'Average Score')[['Student ID', 'Full Name', 'Average Score', 'Grade']]
+                top_performers.to_excel(writer, sheet_name='Top Performers', index=False)
             
             # Subject-wise analysis
             subject_analysis = pd.DataFrame({
@@ -189,21 +206,26 @@ class ReportGeneratorService:
     
     def _calculate_statistics(self, df: pd.DataFrame) -> pd.DataFrame:
         """Calculate comprehensive statistics"""
+        # Filter out rows with None values for accurate calculations
+        df_with_scores = df.dropna(subset=['Average Score'])
+        
         stats = {
             'Total Students': len(df),
-            'Math Average': df['Math Score'].mean(),
-            'Literature Average': df['Literature Score'].mean(),
-            'English Average': df['English Score'].mean(),
-            'Overall Average': df['Average Score'].mean(),
-            'Math Median': df['Math Score'].median(),
-            'Literature Median': df['Literature Score'].median(),
-            'English Median': df['English Score'].median(),
-            'Math Std Dev': df['Math Score'].std(),
-            'Literature Std Dev': df['Literature Score'].std(),
-            'English Std Dev': df['English Score'].std(),
+            'Students with Complete Scores': len(df_with_scores),
+            'Math Average': df['Math Score'].mean() if not df['Math Score'].isna().all() else 0,
+            'Literature Average': df['Literature Score'].mean() if not df['Literature Score'].isna().all() else 0,
+            'English Average': df['English Score'].mean() if not df['English Score'].isna().all() else 0,
+            'Overall Average': df_with_scores['Average Score'].mean() if len(df_with_scores) > 0 else 0,
+            'Math Median': df['Math Score'].median() if not df['Math Score'].isna().all() else 0,
+            'Literature Median': df['Literature Score'].median() if not df['Literature Score'].isna().all() else 0,
+            'English Median': df['English Score'].median() if not df['English Score'].isna().all() else 0,
+            'Math Std Dev': df['Math Score'].std() if not df['Math Score'].isna().all() else 0,
+            'Literature Std Dev': df['Literature Score'].std() if not df['Literature Score'].isna().all() else 0,
+            'English Std Dev': df['English Score'].std() if not df['English Score'].isna().all() else 0,
             'Excellent Count': (df['Grade'] == 'Excellent').sum(),
             'Good Count': (df['Grade'] == 'Good').sum(),
             'Average Count': (df['Grade'] == 'Average').sum(),
+            'Below Average Count': (df['Grade'] == 'Below Average').sum(),
             'Poor Count': (df['Grade'] == 'Poor').sum(),
         }
         return pd.DataFrame(list(stats.items()), columns=['Metric', 'Value'])
@@ -703,17 +725,37 @@ class ReportGeneratorService:
     def _create_score_scatter_matrix(self, df: pd.DataFrame, report_folder: str) -> str:
         """Create scatter matrix for score relationships"""
         from pandas.plotting import scatter_matrix
+        import warnings
         
-        fig = plt.figure(figsize=(12, 12))
-        scatter_matrix(df[['Math Score', 'Literature Score', 'English Score', 'Average Score']],
-                      alpha=0.6, diagonal='hist', 
-                      color='#4ECDC4', edgecolor='black', s=50, figsize=(12, 12))
+        # Check if we have enough data variance to create meaningful scatter matrix
+        score_columns = ['Math Score', 'Literature Score', 'English Score', 'Average Score']
+        available_columns = [col for col in score_columns if col in df.columns]
         
-        plt.suptitle('Score Correlation Scatter Matrix', fontsize=16, fontweight='bold')
+        if len(available_columns) < 2:
+            # Create placeholder chart if insufficient data
+            fig, ax = plt.subplots(figsize=(12, 12))
+            ax.text(0.5, 0.5, 'Insufficient score data for scatter matrix', 
+                   ha='center', va='center', fontsize=16, transform=ax.transAxes)
+            ax.set_title('Score Correlation Scatter Matrix', fontsize=16, fontweight='bold')
+            chart_path = os.path.join(report_folder, "15_score_scatter_matrix.png")
+            plt.savefig(chart_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            return chart_path
         
-        chart_path = os.path.join(report_folder, "15_score_scatter_matrix.png")
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
+        # Suppress pandas plotting warnings for identical values
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', category=UserWarning, module='pandas.plotting')
+            
+            fig = plt.figure(figsize=(12, 12))
+            scatter_matrix(df[available_columns],
+                          alpha=0.6, diagonal='hist', 
+                          color='#4ECDC4', edgecolor='black', s=50, figsize=(12, 12))
+            
+            plt.suptitle('Score Correlation Scatter Matrix', fontsize=16, fontweight='bold')
+            
+            chart_path = os.path.join(report_folder, "15_score_scatter_matrix.png")
+            plt.savefig(chart_path, dpi=300, bbox_inches='tight')
+            plt.close()
         
         return chart_path
     
