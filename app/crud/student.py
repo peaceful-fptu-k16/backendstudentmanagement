@@ -7,15 +7,12 @@ from app.models.student import Student, StudentCreate, StudentUpdate
 from app.core.config import settings
 from app.core.logging import get_database_logger, get_structured_logger
 
-# Initialize loggers
 logger = get_database_logger()
 structured_logger = get_structured_logger("database")
 
 class StudentCRUD:
-    """CRUD operations for Student model"""
     
     def __init__(self):
-        # Simple in-memory cache with TTL
         self.cache = {}
         self.cache_timestamps = {}
     
@@ -122,7 +119,7 @@ class StudentCRUD:
         db: Session,
         *,
         skip: int = 0,
-        limit: int = 100,
+        limit: int = 1000,
         search: Optional[str] = None,
         hometown: Optional[str] = None,
         min_average: Optional[float] = None,

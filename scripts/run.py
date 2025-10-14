@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Quick start script for Student Management System API
-"""
-
 
 import os
 import sys
@@ -10,20 +6,17 @@ import subprocess
 import time
 import requests
 
-# Ensure project root is in sys.path for module imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 def check_python_version():
-    """Check if Python version is compatible"""
     if sys.version_info < (3, 8):
         print("Error: Python 3.8 or higher is required")
         sys.exit(1)
     print(f"✓ Python {sys.version.split()[0]} detected")
 
 def install_dependencies():
-    """Install required dependencies"""
     print("Installing dependencies...")
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])

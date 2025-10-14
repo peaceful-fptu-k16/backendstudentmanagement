@@ -1,41 +1,11 @@
 import pandas as pd
-import io
 from typing import List, Dict, Any, Optional
 from datetime import datetime, date
 
-from app.models.student import Student, StudentCreate, StudentBulkImportResult
+from app.models.student import Student, StudentCreate
 
 class DataService:
     """Service for data processing and cleaning"""
-    
-    @staticmethod
-    def parse_excel_file(file_content: bytes) -> pd.DataFrame:
-        """Parse Excel file to DataFrame"""
-        try:
-            df = pd.read_excel(io.BytesIO(file_content))
-            return df
-        except Exception as e:
-            raise ValueError(f"Failed to parse Excel file: {str(e)}")
-    
-    @staticmethod
-    def parse_csv_file(file_content: bytes, encoding: str = 'utf-8') -> pd.DataFrame:
-        """Parse CSV file to DataFrame"""
-        try:
-            content = file_content.decode(encoding)
-            df = pd.read_csv(io.StringIO(content))
-            return df
-        except UnicodeDecodeError:
-            # Try different encodings
-            for enc in ['latin1', 'cp1252', 'utf-8-sig']:
-                try:
-                    content = file_content.decode(enc)
-                    df = pd.read_csv(io.StringIO(content))
-                    return df
-                except:
-                    continue
-            raise ValueError("Failed to decode CSV file with any supported encoding")
-        except Exception as e:
-            raise ValueError(f"Failed to parse CSV file: {str(e)}")
     
     @staticmethod
     def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:

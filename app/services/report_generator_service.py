@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Report Generator Service
 Generates comprehensive reports with Excel files and visualization charts
@@ -7,7 +6,7 @@ Generates comprehensive reports with Excel files and visualization charts
 import os
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -25,17 +24,14 @@ class ReportGeneratorService:
         self.base_report_dir = "reports"
         self.ensure_report_directory()
         
-        # Set style for charts
         sns.set_style("whitegrid")
         plt.rcParams['figure.figsize'] = (10, 6)
         plt.rcParams['font.size'] = 10
         
     def ensure_report_directory(self):
-        """Ensure the base reports directory exists"""
         os.makedirs(self.base_report_dir, exist_ok=True)
     
     def create_report_folder(self, prefix: str = "crawl") -> str:
-        """Create a timestamped folder for the report"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         folder_name = f"{prefix}_{timestamp}"
         folder_path = os.path.join(self.base_report_dir, folder_name)
@@ -62,19 +58,10 @@ class ReportGeneratorService:
         if not students:
             raise ValueError("No student data provided for report generation")
         
-        # Create report folder
         report_folder = self.create_report_folder(prefix=report_type)
-        
-        # Convert students to DataFrame
         df = self._students_to_dataframe(students)
-        
-        # Generate Excel file
         excel_path = self._generate_excel_report(df, report_folder, additional_info)
-        
-        # Generate all charts
         charts = self._generate_all_charts(df, report_folder)
-        
-        # Generate summary file
         summary_path = self._generate_summary_file(df, report_folder, additional_info, charts)
         
         return {
@@ -87,16 +74,13 @@ class ReportGeneratorService:
         }
     
     def _students_to_dataframe(self, students: List[Student]) -> pd.DataFrame:
-        """Convert list of Student objects to pandas DataFrame"""
         data = []
         for student in students:
-            # Handle both Student objects and dict representations
             if isinstance(student, dict):
                 student_dict = student
             elif hasattr(student, 'dict'):
                 student_dict = student.dict()
             else:
-                # Direct attribute access
                 student_dict = {
                     'student_id': student.student_id,
                     'first_name': student.first_name,
@@ -111,11 +95,8 @@ class ReportGeneratorService:
                     'grade': student.grade
                 }
             
-            # Calculate proper average score and grade using Student methods
             calculated_average = student.get_average_score() if hasattr(student, 'get_average_score') else None
             calculated_grade = student.get_grade() if hasattr(student, 'get_grade') else None
-            
-            # Format birth date properly if available
             birth_date_formatted = None
             if student_dict.get('birth_date'):
                 birth_date = student_dict.get('birth_date')
@@ -141,7 +122,6 @@ class ReportGeneratorService:
         
         df = pd.DataFrame(data)
         
-        # Ensure numeric columns are float type, keep None for missing scores
         numeric_columns = ['Math Score', 'Literature Score', 'English Score', 'Average Score']
         for col in numeric_columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
@@ -158,20 +138,16 @@ class ReportGeneratorService:
         excel_path = os.path.join(report_folder, "student_report.xlsx")
         
         with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
-            # Main data sheet
             df.to_excel(writer, sheet_name='Students', index=False)
             
-            # Statistics sheet
             stats_df = self._calculate_statistics(df)
             stats_df.to_excel(writer, sheet_name='Statistics')
             
-            # Grade distribution sheet
             grade_dist = df['Grade'].value_counts().reset_index()
             grade_dist.columns = ['Grade', 'Count']
             grade_dist.to_excel(writer, sheet_name='Grade Distribution', index=False)
             
-            # Hometown analysis sheet  
-            df_with_hometown = df[df['Hometown'].notna()]  # Filter out None hometowns
+            df_with_hometown = df[df['Hometown'].notna()]
             if len(df_with_hometown) > 0:
                 hometown_stats = df_with_hometown.groupby('Hometown').agg({
                     'Student ID': 'count',
@@ -181,13 +157,10 @@ class ReportGeneratorService:
                 hometown_stats = hometown_stats.sort_values('Student Count', ascending=False)
                 hometown_stats.to_excel(writer, sheet_name='Hometown Analysis', index=False)
             
-            # Top performers sheet - only students with complete scores
             df_complete = df.dropna(subset=['Average Score'])
             if len(df_complete) > 0:
                 top_performers = df_complete.nlargest(min(20, len(df_complete)), 'Average Score')[['Student ID', 'Full Name', 'Average Score', 'Grade']]
                 top_performers.to_excel(writer, sheet_name='Top Performers', index=False)
-            
-            # Subject-wise analysis
             subject_analysis = pd.DataFrame({
                 'Subject': ['Math', 'Literature', 'English'],
                 'Average': [df['Math Score'].mean(), df['Literature Score'].mean(), df['English Score'].mean()],
@@ -197,7 +170,6 @@ class ReportGeneratorService:
             })
             subject_analysis.to_excel(writer, sheet_name='Subject Analysis', index=False)
             
-            # Additional info sheet
             if additional_info:
                 info_df = pd.DataFrame(list(additional_info.items()), columns=['Key', 'Value'])
                 info_df.to_excel(writer, sheet_name='Report Info', index=False)
@@ -205,8 +177,6 @@ class ReportGeneratorService:
         return excel_path
     
     def _calculate_statistics(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Calculate comprehensive statistics"""
-        # Filter out rows with None values for accurate calculations
         df_with_scores = df.dropna(subset=['Average Score'])
         
         stats = {
@@ -231,94 +201,47 @@ class ReportGeneratorService:
         return pd.DataFrame(list(stats.items()), columns=['Metric', 'Value'])
     
     def _generate_all_charts(self, df: pd.DataFrame, report_folder: str) -> List[Dict[str, str]]:
-        """Generate selected visualization charts (1, 3, 4, 6, 10, 11, 13, 14, 15, 17, 18, 20)"""
         charts = []
         
-        # 1. Score Distribution (Histogram)
         chart_path = self._create_score_distribution_chart(df, report_folder)
         charts.append({"name": "score_distribution", "path": chart_path})
         
-        # 2. Grade Distribution (Pie Chart) - SKIPPED
-        # chart_path = self._create_grade_pie_chart(df, report_folder)
-        # charts.append({"name": "grade_distribution", "path": chart_path})
-        
-        # 3. Subject Comparison (Bar Chart)
         chart_path = self._create_subject_comparison_chart(df, report_folder)
         charts.append({"name": "subject_comparison", "path": chart_path})
         
-        # 4. Score Correlation Heatmap
         chart_path = self._create_correlation_heatmap(df, report_folder)
         charts.append({"name": "correlation_heatmap", "path": chart_path})
         
-        # 5. Hometown Performance (Bar Chart) - SKIPPED
-        # chart_path = self._create_hometown_performance_chart(df, report_folder)
-        # charts.append({"name": "hometown_performance", "path": chart_path})
-        
-        # 6. Box Plot for Scores
         chart_path = self._create_score_boxplot(df, report_folder)
         charts.append({"name": "score_boxplot", "path": chart_path})
         
-        # 7. Top 10 Students (Bar Chart) - SKIPPED
-        # chart_path = self._create_top_students_chart(df, report_folder)
-        # charts.append({"name": "top_students", "path": chart_path})
-        
-        # 8. Score Distribution by Subject (Violin Plot) - SKIPPED
-        # chart_path = self._create_violin_plot(df, report_folder)
-        # charts.append({"name": "violin_plot", "path": chart_path})
-        
-        # 9. Performance Trends (if age data available) - SKIPPED
-        # if 'Age' in df.columns and df['Age'].notna().any():
-        #     chart_path = self._create_age_performance_chart(df, report_folder)
-        #     charts.append({"name": "age_performance", "path": chart_path})
-        
-        # 10. Grade Distribution by Hometown
         chart_path = self._create_grade_by_hometown_chart(df, report_folder)
         charts.append({"name": "grade_by_hometown", "path": chart_path})
         
-        # 11. Score Range Analysis
         chart_path = self._create_score_range_analysis(df, report_folder)
         charts.append({"name": "score_range_analysis", "path": chart_path})
         
-        # 12. Average Score by Hometown (Horizontal Bar) - SKIPPED
-        # chart_path = self._create_avg_score_by_hometown(df, report_folder)
-        # charts.append({"name": "avg_score_by_hometown", "path": chart_path})
-        
-        # 13. Score Density Plot
         chart_path = self._create_score_density_plot(df, report_folder)
         charts.append({"name": "score_density", "path": chart_path})
         
-        # 14. Performance Radar Chart (Top 5 Students)
         chart_path = self._create_performance_radar(df, report_folder)
         charts.append({"name": "performance_radar", "path": chart_path})
         
-        # 15. Score Scatter Matrix
         chart_path = self._create_score_scatter_matrix(df, report_folder)
         charts.append({"name": "score_scatter_matrix", "path": chart_path})
         
-        # 16. Grade Count by Score Range - SKIPPED
-        # chart_path = self._create_grade_count_chart(df, report_folder)
-        # charts.append({"name": "grade_count", "path": chart_path})
-        
-        # 17. Subject Performance Comparison (Line Chart)
         chart_path = self._create_subject_line_comparison(df, report_folder)
         charts.append({"name": "subject_line_comparison", "path": chart_path})
         
-        # 18. Cumulative Score Distribution
         chart_path = self._create_cumulative_distribution(df, report_folder)
         charts.append({"name": "cumulative_distribution", "path": chart_path})
         
-        # 19. Heatmap of Student Performance - SKIPPED
-        # chart_path = self._create_student_performance_heatmap(df, report_folder)
-        # charts.append({"name": "student_performance_heatmap", "path": chart_path})
-        
-        # 20. Statistical Summary Chart
         chart_path = self._create_statistical_summary(df, report_folder)
         charts.append({"name": "statistical_summary", "path": chart_path})
         
         return charts
     
     def _create_score_distribution_chart(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create score distribution histogram"""
         plt.figure(figsize=(12, 6))
         
         plt.subplot(1, 3, 1)
@@ -352,26 +275,7 @@ class ReportGeneratorService:
         
         return chart_path
     
-    def _create_grade_pie_chart(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create grade distribution pie chart"""
-        plt.figure(figsize=(10, 8))
-        
-        grade_counts = df['Grade'].value_counts()
-        colors = ['#4CAF50', '#2196F3', '#FFC107', '#F44336']
-        explode = [0.1 if i == 0 else 0 for i in range(len(grade_counts))]
-        
-        plt.pie(grade_counts.values, labels=grade_counts.index, autopct='%1.1f%%',
-                startangle=90, colors=colors, explode=explode, shadow=True)
-        plt.title('Grade Distribution', fontsize=16, fontweight='bold')
-        
-        chart_path = os.path.join(report_folder, "02_grade_distribution.png")
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return chart_path
-    
     def _create_subject_comparison_chart(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create subject comparison bar chart"""
         plt.figure(figsize=(10, 6))
         
         subjects = ['Math Score', 'Literature Score', 'English Score']
@@ -380,7 +284,6 @@ class ReportGeneratorService:
         bars = plt.bar(['Math', 'Literature', 'English'], averages, 
                       color=['skyblue', 'lightgreen', 'lightcoral'], edgecolor='black')
         
-        # Add value labels on bars
         for bar in bars:
             height = bar.get_height()
             plt.text(bar.get_x() + bar.get_width()/2., height,
@@ -417,38 +320,6 @@ class ReportGeneratorService:
         
         return chart_path
     
-    def _create_hometown_performance_chart(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create hometown performance chart"""
-        plt.figure(figsize=(14, 8))
-        
-        hometown_stats = df.groupby('Hometown').agg({
-            'Average Score': 'mean',
-            'Student ID': 'count'
-        }).sort_values('Average Score', ascending=False).head(15)
-        
-        x = range(len(hometown_stats))
-        
-        # Create bar chart
-        bars = plt.bar(x, hometown_stats['Average Score'], color='steelblue', edgecolor='black', alpha=0.7)
-        
-        # Add student count labels
-        for i, (idx, row) in enumerate(hometown_stats.iterrows()):
-            plt.text(i, row['Average Score'] + 0.1, f"n={row['Student ID']}", 
-                    ha='center', fontsize=9)
-        
-        plt.xlabel('Hometown', fontsize=12)
-        plt.ylabel('Average Score', fontsize=12)
-        plt.title('Top 15 Hometowns by Average Score', fontsize=16, fontweight='bold')
-        plt.xticks(x, hometown_stats.index, rotation=45, ha='right')
-        plt.ylim(0, 10)
-        plt.grid(axis='y', alpha=0.3)
-        
-        chart_path = os.path.join(report_folder, "05_hometown_performance.png")
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return chart_path
-    
     def _create_score_boxplot(self, df: pd.DataFrame, report_folder: str) -> str:
         """Create box plot for score distribution"""
         plt.figure(figsize=(12, 8))
@@ -468,82 +339,6 @@ class ReportGeneratorService:
         plt.grid(axis='y', alpha=0.3)
         
         chart_path = os.path.join(report_folder, "06_score_boxplot.png")
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return chart_path
-    
-    def _create_top_students_chart(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create top 10 students chart"""
-        plt.figure(figsize=(12, 8))
-        
-        top_10 = df.nlargest(10, 'Average Score')[['Full Name', 'Average Score']]
-        
-        colors = plt.cm.viridis(np.linspace(0, 1, len(top_10)))
-        bars = plt.barh(range(len(top_10)), top_10['Average Score'], color=colors, edgecolor='black')
-        
-        plt.yticks(range(len(top_10)), top_10['Full Name'])
-        plt.xlabel('Average Score', fontsize=12)
-        plt.title('Top 10 Students by Average Score', fontsize=16, fontweight='bold')
-        plt.xlim(0, 10)
-        plt.gca().invert_yaxis()
-        
-        # Add score labels
-        for i, (idx, row) in enumerate(top_10.iterrows()):
-            plt.text(row['Average Score'] + 0.1, i, f"{row['Average Score']:.2f}", 
-                    va='center', fontsize=10, fontweight='bold')
-        
-        chart_path = os.path.join(report_folder, "07_top_students.png")
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return chart_path
-    
-    def _create_violin_plot(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create violin plot for score distribution"""
-        plt.figure(figsize=(12, 8))
-        
-        # Prepare data for violin plot
-        data_melted = pd.melt(df, value_vars=['Math Score', 'Literature Score', 'English Score'],
-                             var_name='Subject', value_name='Score')
-        
-        sns.violinplot(x='Subject', y='Score', data=data_melted, palette='Set2')
-        plt.title('Score Distribution by Subject (Violin Plot)', fontsize=16, fontweight='bold')
-        plt.ylabel('Score', fontsize=12)
-        plt.xlabel('Subject', fontsize=12)
-        plt.ylim(0, 10)
-        plt.grid(axis='y', alpha=0.3)
-        
-        chart_path = os.path.join(report_folder, "08_violin_plot.png")
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return chart_path
-    
-    def _create_age_performance_chart(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create age vs performance scatter plot"""
-        plt.figure(figsize=(12, 8))
-        
-        df_clean = df.dropna(subset=['Age', 'Average Score'])
-        
-        plt.scatter(df_clean['Age'], df_clean['Average Score'], 
-                   alpha=0.6, s=100, c=df_clean['Average Score'], 
-                   cmap='viridis', edgecolors='black')
-        
-        # Add trend line
-        z = np.polyfit(df_clean['Age'], df_clean['Average Score'], 1)
-        p = np.poly1d(z)
-        plt.plot(df_clean['Age'].sort_values(), p(df_clean['Age'].sort_values()), 
-                "r--", linewidth=2, label='Trend')
-        
-        plt.xlabel('Age', fontsize=12)
-        plt.ylabel('Average Score', fontsize=12)
-        plt.title('Age vs Performance Analysis', fontsize=16, fontweight='bold')
-        plt.colorbar(label='Average Score')
-        plt.legend()
-        plt.grid(alpha=0.3)
-        
-        chart_path = os.path.join(report_folder, "09_age_performance.png")
         plt.savefig(chart_path, dpi=300, bbox_inches='tight')
         plt.close()
         
@@ -622,35 +417,6 @@ class ReportGeneratorService:
         plt.grid(axis='y', alpha=0.3)
         
         chart_path = os.path.join(report_folder, "11_score_range_analysis.png")
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return chart_path
-    
-    def _create_avg_score_by_hometown(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create average score by hometown horizontal bar chart"""
-        plt.figure(figsize=(10, 8))
-        
-        hometown_stats = df.groupby('Hometown')['Average Score'].agg(['mean', 'count'])
-        hometown_stats = hometown_stats[hometown_stats['count'] >= 2]  # At least 2 students
-        hometown_stats = hometown_stats.sort_values('mean', ascending=True).tail(15)
-        
-        colors = plt.cm.viridis(np.linspace(0.3, 0.9, len(hometown_stats)))
-        bars = plt.barh(hometown_stats.index, hometown_stats['mean'], 
-                       color=colors, edgecolor='black', alpha=0.8)
-        
-        # Add value labels
-        for i, (idx, row) in enumerate(hometown_stats.iterrows()):
-            plt.text(row['mean'] + 0.05, i, f"{row['mean']:.2f}", 
-                    va='center', fontsize=9, fontweight='bold')
-        
-        plt.xlabel('Average Score', fontsize=12)
-        plt.ylabel('Hometown', fontsize=12)
-        plt.title('Average Score by Hometown (Top 15)', fontsize=16, fontweight='bold')
-        plt.xlim(0, 10.5)
-        plt.grid(axis='x', alpha=0.3)
-        
-        chart_path = os.path.join(report_folder, "12_avg_score_by_hometown.png")
         plt.savefig(chart_path, dpi=300, bbox_inches='tight')
         plt.close()
         
@@ -759,39 +525,6 @@ class ReportGeneratorService:
         
         return chart_path
     
-    def _create_grade_count_chart(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create grade count donut chart"""
-        plt.figure(figsize=(10, 8))
-        
-        grade_counts = df['Grade'].value_counts()
-        colors = plt.cm.Spectral(np.linspace(0.2, 0.8, len(grade_counts)))
-        
-        wedges, texts, autotexts = plt.pie(grade_counts, labels=grade_counts.index,
-                                           autopct='%1.1f%%', startangle=90,
-                                           colors=colors, explode=[0.05]*len(grade_counts),
-                                           wedgeprops={'edgecolor': 'black', 'linewidth': 2})
-        
-        # Make percentage text bold
-        for autotext in autotexts:
-            autotext.set_color('white')
-            autotext.set_fontsize(11)
-            autotext.set_fontweight('bold')
-        
-        # Add count in center
-        centre_circle = plt.Circle((0, 0), 0.70, fc='white', linewidth=1.5, edgecolor='black')
-        plt.gca().add_artist(centre_circle)
-        
-        plt.text(0, 0, f'Total\n{len(df)}', ha='center', va='center', 
-                fontsize=20, fontweight='bold')
-        
-        plt.title('Grade Distribution (Donut Chart)', fontsize=16, fontweight='bold', pad=20)
-        
-        chart_path = os.path.join(report_folder, "16_grade_count.png")
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return chart_path
-    
     def _create_subject_line_comparison(self, df: pd.DataFrame, report_folder: str) -> str:
         """Create line chart comparing subjects across students"""
         plt.figure(figsize=(14, 6))
@@ -845,36 +578,6 @@ class ReportGeneratorService:
         plt.ylim(0, 100)
         
         chart_path = os.path.join(report_folder, "18_cumulative_distribution.png")
-        plt.savefig(chart_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        return chart_path
-    
-    def _create_student_performance_heatmap(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create heatmap showing top 20 students performance"""
-        plt.figure(figsize=(10, 12))
-        
-        # Get top 20 students
-        top_students = df.nlargest(20, 'Average Score')
-        
-        # Create matrix
-        data_matrix = top_students[['Math Score', 'Literature Score', 'English Score']].values
-        student_names = [name[:15] + '...' if len(name) > 15 else name 
-                        for name in top_students['Full Name']]
-        
-        sns.heatmap(data_matrix, annot=True, fmt='.2f', cmap='YlGnBu',
-                   yticklabels=student_names, 
-                   xticklabels=['Math', 'Literature', 'English'],
-                   cbar_kws={'label': 'Score'}, linewidths=0.5, 
-                   linecolor='gray', vmin=0, vmax=10)
-        
-        plt.title('Top 20 Students Performance Heatmap', 
-                 fontsize=16, fontweight='bold', pad=20)
-        plt.xlabel('Subject', fontsize=12)
-        plt.ylabel('Student', fontsize=12)
-        plt.tight_layout()
-        
-        chart_path = os.path.join(report_folder, "19_student_performance_heatmap.png")
         plt.savefig(chart_path, dpi=300, bbox_inches='tight')
         plt.close()
         

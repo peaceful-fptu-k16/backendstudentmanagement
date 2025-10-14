@@ -349,8 +349,7 @@ async def generate_report_from_url(
                 additional_info={
                     "source": "database",
                     "requested_url": crawl_url,
-                    "total_students": len(students),
-                    "note": "No data crawled from HTML, used database instead"
+                    "total_students": len(students)
                 }
             )
             

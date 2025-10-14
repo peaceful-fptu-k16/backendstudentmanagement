@@ -10,12 +10,10 @@ from app.database import create_db_and_tables
 from app.api import api_router
 from app.core.logging import get_api_logger, get_structured_logger, StudentManagementLogger
 
-# Setup loggers
 log_manager = StudentManagementLogger()
 logger = get_api_logger()
 structured_logger = get_structured_logger("api")
 
-# Create FastAPI app
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.PROJECT_VERSION,
@@ -25,25 +23,20 @@ app = FastAPI(
     openapi_url="/api/openapi.json"
 )
 
-# Add middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,  # Specific allowed origins
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Add trusted host middleware for security
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"]  # Configure appropriately for production
+    allowed_hosts=["*"]
 )
-
-# Custom middleware for request logging and timing
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
-    # Log incoming request
     structured_logger.log_api_request(
         method=request.method,
         path=str(request.url.path),
@@ -57,7 +50,6 @@ async def add_process_time_header(request: Request, call_next):
     
     response.headers["X-Process-Time"] = str(process_time)
     
-    # Log response
     structured_logger.log_api_response(
         method=request.method,
         path=str(request.url.path),
@@ -66,7 +58,6 @@ async def add_process_time_header(request: Request, call_next):
         response_size=response.headers.get("content-length")
     )
     
-    # Traditional log message
     logger.info(
         f"{request.method} {request.url.path} - "
         f"Status: {response.status_code} - "
@@ -75,11 +66,8 @@ async def add_process_time_header(request: Request, call_next):
     )
     
     return response
-
-# Exception handlers
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
-    # Log detailed error information
     error_trace = traceback.format_exc()
     structured_logger.log_error(
         error_type=type(exc).__name__,
@@ -104,10 +92,7 @@ async def general_exception_handler(request: Request, exc: Exception):
         }
     )
 
-# Include API routes
 app.include_router(api_router, prefix=settings.API_V1_STR)
-
-# Root endpoint
 @app.get("/")
 async def root():
     return {
@@ -118,7 +103,6 @@ async def root():
         "api_prefix": settings.API_V1_STR
     }
 
-# Health check endpoint
 @app.get("/health")
 async def health_check():
     return {
@@ -127,28 +111,18 @@ async def health_check():
         "version": settings.PROJECT_VERSION
     }
 
-# Startup event
 @app.on_event("startup")
 async def startup_event():
-    """Initialize database and perform startup tasks"""
     logger.info("Starting up Student Management API...")
-    
-    # Cleanup old log folders (keep 30 days)
     log_manager.cleanup_old_logs(days_to_keep=30)
     logger.info(f"Log cleanup completed - current log folder: {log_manager.get_current_log_folder()}")
-    
-    # Create database tables
     create_db_and_tables()
     logger.info("Database tables created/verified")
-    
     logger.info("API startup complete")
 
-# Shutdown event
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Cleanup tasks on shutdown"""
     logger.info("Shutting down Student Management API...")
-    # Add any cleanup tasks here
     logger.info("API shutdown complete")
 
 if __name__ == "__main__":
