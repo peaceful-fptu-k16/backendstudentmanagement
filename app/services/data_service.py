@@ -5,11 +5,9 @@ from datetime import datetime, date
 from app.models.student import Student, StudentCreate
 
 class DataService:
-    """Service for data processing and cleaning"""
     
     @staticmethod
     def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-        """Clean and standardize DataFrame with advanced pandas operations"""
         # Create a copy to avoid modifying original
         df_clean = df.copy()
         
@@ -149,7 +147,6 @@ class DataService:
     
     @staticmethod
     def dataframe_to_students(df: pd.DataFrame) -> tuple[List[StudentCreate], List[str]]:
-        """Convert DataFrame to StudentCreate objects"""
         students = []
         errors = []
         
@@ -209,7 +206,6 @@ class DataService:
     
     @staticmethod
     def generate_sample_data(count: int = 100) -> List[StudentCreate]:
-        """Generate sample student data"""
         import random
         
         students = []
@@ -246,7 +242,6 @@ class DataService:
     
     @staticmethod
     def create_analytics_dataframe(students: List[Student]) -> pd.DataFrame:
-        """Create a comprehensive DataFrame for analytics with computed columns"""
         data = []
         for student in students:
             data.append({
@@ -300,7 +295,6 @@ class DataService:
     
     @staticmethod
     def get_advanced_statistics(df: pd.DataFrame) -> Dict[str, Any]:
-        """Generate advanced statistics using pandas operations"""
         if df.empty:
             return {}
         

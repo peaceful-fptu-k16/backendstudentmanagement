@@ -11,7 +11,6 @@ from app.core.config import settings
 from app.models.student import StudentCreate
 
 class CrawlerService:
-    """Service for crawling student data from websites"""
     
     def __init__(self):
         self.session = requests.Session()
@@ -24,7 +23,6 @@ class CrawlerService:
         })
     
     def crawl_student_list(self, url: str, parser_config: Optional[Dict] = None) -> List[Dict[str, Any]]:
-        """Crawl a list of students from a webpage"""
         try:
             response = self.session.get(url, timeout=30)
             response.raise_for_status()
@@ -95,7 +93,6 @@ class CrawlerService:
             raise ValueError(f"Failed to parse HTML: {str(e)}")
     
     def crawl_student_detail(self, url: str, parser_config: Optional[Dict] = None) -> Dict[str, Any]:
-        """Crawl detailed information for a single student"""
         try:
             response = self.session.get(url, timeout=30)
             response.raise_for_status()
@@ -140,7 +137,6 @@ class CrawlerService:
             raise ValueError(f"Failed to parse HTML: {str(e)}")
     
     def crawl_frontend_page(self, url: str) -> List[Dict[str, Any]]:
-        """Crawl student data from frontend page on http://127.0.0.1:5500 (HTML first, API fallback)"""
         try:
             # Fixed URLs
             FRONTEND_URL = "http://127.0.0.1:5500/"
@@ -208,7 +204,6 @@ class CrawlerService:
             raise ValueError(f"Failed to parse frontend HTML: {str(e)}")
     
     def _extract_student_data_from_soup(self, soup) -> List[Dict[str, Any]]:
-        """Helper method to extract student data from BeautifulSoup object"""
         students_data = []
         
         # Look for student table - try multiple selectors
@@ -320,7 +315,6 @@ class CrawlerService:
         return students_data
 
     def auto_detect_student_data(self, url: str) -> List[Dict[str, Any]]:
-        """Automatically detect and extract student data from a webpage"""
         try:
             # First, try our specific frontend crawler for any local URLs or HTML files
             # This includes localhost, 127.0.0.1, file://, or any URL containing our frontend patterns
@@ -400,7 +394,6 @@ class CrawlerService:
             raise ValueError(f"Failed to parse HTML: {str(e)}")
     
     def clean_crawled_data(self, raw_data: List[Dict[str, Any]]) -> List[StudentCreate]:
-        """Clean and validate crawled student data"""
         students = []
         
         for data in raw_data:

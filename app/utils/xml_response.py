@@ -10,11 +10,9 @@ from decimal import Decimal
 
 
 class XMLBuilder:
-    """Helper class to build XML responses"""
     
     @staticmethod
     def dict_to_xml(data: Dict[str, Any], root_name: str = "response") -> str:
-        """Convert dictionary to XML string"""
         root = ET.Element(root_name)
         XMLBuilder._add_dict_to_element(root, data)
         ET.indent(root, space="  ", level=0)
@@ -22,7 +20,6 @@ class XMLBuilder:
     
     @staticmethod
     def list_to_xml(data: List[Any], root_name: str = "response", item_name: str = "item") -> str:
-        """Convert list to XML string"""
         root = ET.Element(root_name)
         for item in data:
             item_elem = ET.SubElement(root, item_name)
@@ -36,7 +33,6 @@ class XMLBuilder:
     
     @staticmethod
     def _add_dict_to_element(parent: ET.Element, data: Dict[str, Any]):
-        """Recursively add dictionary items to XML element"""
         for key, value in data.items():
             # Sanitize key name for XML
             safe_key = XMLBuilder._sanitize_key(key)
@@ -62,7 +58,6 @@ class XMLBuilder:
     
     @staticmethod
     def _convert_value(value: Any) -> str:
-        """Convert Python value to XML string"""
         if value is None:
             return ""
         elif isinstance(value, bool):
@@ -76,7 +71,6 @@ class XMLBuilder:
     
     @staticmethod
     def _sanitize_key(key: str) -> str:
-        """Sanitize key to be valid XML element name"""
         # Replace invalid characters with underscore
         key = key.replace(" ", "_")
         key = key.replace("-", "_")
@@ -89,11 +83,9 @@ class XMLBuilder:
 
 
 class StudentXMLBuilder:
-    """Specialized XML builder for student data"""
     
     @staticmethod
     def student_to_xml(student_data: Dict[str, Any]) -> str:
-        """Convert student response to XML"""
         root = ET.Element("student")
         
         # Basic info
@@ -144,7 +136,6 @@ class StudentXMLBuilder:
     
     @staticmethod
     def students_to_xml(students_data: List[Dict[str, Any]], pagination: Optional[Dict[str, Any]] = None) -> str:
-        """Convert list of students with pagination to XML"""
         root = ET.Element("students")
         
         # Add pagination info if provided
@@ -203,7 +194,6 @@ class StudentXMLBuilder:
     
     @staticmethod
     def generation_result_to_xml(result: Dict[str, Any]) -> str:
-        """Convert sample generation result to XML"""
         root = ET.Element("generation_result")
         
         ET.SubElement(root, "total_generated").text = str(result.get("total_generated", 0))
@@ -228,16 +218,6 @@ class StudentXMLBuilder:
 
 
 def create_xml_response(data: Any, root_name: str = "response") -> str:
-    """
-    Main function to create XML response from any data structure
-    
-    Args:
-        data: Data to convert (dict, list, or custom object)
-        root_name: Name of root XML element
-    
-    Returns:
-        XML string with declaration
-    """
     if isinstance(data, dict):
         return XMLBuilder.dict_to_xml(data, root_name)
     elif isinstance(data, list):

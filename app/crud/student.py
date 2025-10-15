@@ -17,7 +17,6 @@ class StudentCRUD:
         self.cache_timestamps = {}
     
     def _is_cache_valid(self, key: str) -> bool:
-        """Check if cache entry is still valid"""
         if key not in self.cache:
             return False
         if key not in self.cache_timestamps:
@@ -28,18 +27,15 @@ class StudentCRUD:
         return age < settings.CACHE_TTL
     
     def _get_from_cache(self, key: str):
-        """Get from cache if valid"""
         if self._is_cache_valid(key):
             return self.cache[key]
         return None
     
     def _set_cache(self, key: str, value):
-        """Set cache with timestamp"""
         self.cache[key] = value
         self.cache_timestamps[key] = time.time()
     
     def _clear_cache_pattern(self, pattern: str):
-        """Clear cache entries matching pattern"""
         keys_to_remove = [key for key in self.cache.keys() if key.startswith(pattern)]
         for key in keys_to_remove:
             if key in self.cache:
@@ -48,7 +44,6 @@ class StudentCRUD:
                 del self.cache_timestamps[key]
     
     def create(self, db: Session, *, obj_in: StudentCreate) -> Student:
-        """Create a new student"""
         start_time = time.time()
         logger.info(f"Creating new student with ID: {obj_in.student_id}")
         
@@ -90,7 +85,6 @@ class StudentCRUD:
         return db_obj
     
     def get(self, db: Session, id: int) -> Optional[Student]:
-        """Get student by ID"""
         cache_key = f"student_{id}"
         cached_result = self._get_from_cache(cache_key)
         if cached_result is not None:
@@ -102,7 +96,6 @@ class StudentCRUD:
         return student
     
     def get_by_student_id(self, db: Session, student_id: str) -> Optional[Student]:
-        """Get student by student_id"""
         cache_key = f"student_by_id_{student_id}"
         cached_result = self._get_from_cache(cache_key)
         if cached_result is not None:
@@ -127,7 +120,6 @@ class StudentCRUD:
         sort_by: Optional[str] = None,
         sort_order: str = "asc"
     ) -> tuple[List[Student], int]:
-        """Get multiple students with filtering and pagination"""
         
         # Build cache key based on parameters
         cache_key = f"students_{skip}_{limit}_{search}_{hometown}_{min_average}_{max_average}_{sort_by}_{sort_order}"
@@ -203,7 +195,6 @@ class StudentCRUD:
         return result
     
     def update(self, db: Session, *, db_obj: Student, obj_in: StudentUpdate) -> Student:
-        """Update a student"""
         update_data = obj_in.dict(exclude_unset=True)
         
         # Check if updating student_id and it doesn't conflict
@@ -229,7 +220,6 @@ class StudentCRUD:
         return db_obj
     
     def delete(self, db: Session, *, id: int) -> Optional[Student]:
-        """Delete a student"""
         student = db.get(Student, id)
         if student:
             db.delete(student)
@@ -243,7 +233,6 @@ class StudentCRUD:
         return student
     
     def bulk_create(self, db: Session, *, students_in: List[StudentCreate]) -> tuple[List[Student], List[str]]:
-        """Bulk create students"""
         start_time = time.time()
         logger.info(f"Starting bulk create for {len(students_in)} students")
         
@@ -307,12 +296,6 @@ class StudentCRUD:
         return created_students, errors
     
     def get_analytics(self, db: Session) -> Dict[str, Any]:
-        """
-        Get student analytics
-        
-        Note: Only students with all three scores (math, literature, english) 
-        are included in grade distribution and average statistics.
-        """
         cache_key = "analytics"
         cached_result = self._get_from_cache(cache_key)
         if cached_result is not None:
@@ -400,7 +383,6 @@ class StudentCRUD:
         return analytics
     
     def _compare_subjects(self, students: List[Student], subject1: str, subject2: str) -> Dict[str, int]:
-        """Compare two subjects"""
         better_subject1 = 0
         better_subject2 = 0
         equal = 0
@@ -424,7 +406,6 @@ class StudentCRUD:
         }
     
     def _clear_cache_pattern(self, pattern: str):
-        """Clear cache entries matching pattern"""
         keys_to_remove = [key for key in self.cache.keys() if key.startswith(pattern)]
         for key in keys_to_remove:
             del self.cache[key]

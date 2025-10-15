@@ -1,8 +1,3 @@
-"""
-Report Generator Service
-Generates comprehensive reports with Excel files and visualization charts
-"""
-
 import os
 import pandas as pd
 import matplotlib
@@ -18,7 +13,6 @@ from app.models.student import Student
 
 
 class ReportGeneratorService:
-    """Service for generating comprehensive student reports"""
     
     def __init__(self):
         self.base_report_dir = "reports"
@@ -44,17 +38,6 @@ class ReportGeneratorService:
         report_type: str = "crawl",
         additional_info: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """
-        Generate a comprehensive report with Excel file and multiple charts
-        
-        Args:
-            students: List of Student objects
-            report_type: Type of report (crawl, export, analysis, etc.)
-            additional_info: Additional information to include in the report
-            
-        Returns:
-            Dictionary with report information
-        """
         if not students:
             raise ValueError("No student data provided for report generation")
         
@@ -134,7 +117,6 @@ class ReportGeneratorService:
         report_folder: str,
         additional_info: Optional[Dict[str, Any]] = None
     ) -> str:
-        """Generate Excel file with multiple sheets"""
         excel_path = os.path.join(report_folder, "student_report.xlsx")
         
         with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
@@ -302,7 +284,6 @@ class ReportGeneratorService:
         return chart_path
     
     def _create_correlation_heatmap(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create correlation heatmap"""
         plt.figure(figsize=(10, 8))
         
         score_cols = ['Math Score', 'Literature Score', 'English Score', 'Average Score']
@@ -321,7 +302,6 @@ class ReportGeneratorService:
         return chart_path
     
     def _create_score_boxplot(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create box plot for score distribution"""
         plt.figure(figsize=(12, 8))
         
         data = [df['Math Score'], df['Literature Score'], df['English Score'], df['Average Score']]
@@ -345,7 +325,6 @@ class ReportGeneratorService:
         return chart_path
     
     def _create_grade_by_hometown_chart(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create stacked bar chart for grade distribution by hometown"""
         plt.figure(figsize=(14, 8))
         
         # Get top 10 hometowns by student count
@@ -378,7 +357,6 @@ class ReportGeneratorService:
     # ========================================================================
     
     def _create_score_range_analysis(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create score range analysis chart"""
         plt.figure(figsize=(12, 6))
         
         # Define score ranges
@@ -423,7 +401,6 @@ class ReportGeneratorService:
         return chart_path
     
     def _create_score_density_plot(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create density plot for all subjects"""
         plt.figure(figsize=(12, 6))
         
         subjects = ['Math Score', 'Literature Score', 'English Score']
@@ -447,7 +424,6 @@ class ReportGeneratorService:
         return chart_path
     
     def _create_performance_radar(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create radar chart for top 5 students"""
         fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(111, projection='polar')
         
@@ -489,7 +465,6 @@ class ReportGeneratorService:
         return chart_path
     
     def _create_score_scatter_matrix(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create scatter matrix for score relationships"""
         from pandas.plotting import scatter_matrix
         import warnings
         
@@ -526,7 +501,6 @@ class ReportGeneratorService:
         return chart_path
     
     def _create_subject_line_comparison(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create line chart comparing subjects across students"""
         plt.figure(figsize=(14, 6))
         
         # Sort by average score
@@ -557,7 +531,6 @@ class ReportGeneratorService:
         return chart_path
     
     def _create_cumulative_distribution(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create cumulative distribution function"""
         plt.figure(figsize=(12, 6))
         
         subjects = ['Math Score', 'Literature Score', 'English Score', 'Average Score']
@@ -584,7 +557,6 @@ class ReportGeneratorService:
         return chart_path
     
     def _create_statistical_summary(self, df: pd.DataFrame, report_folder: str) -> str:
-        """Create statistical summary visualization"""
         fig, axes = plt.subplots(2, 2, figsize=(14, 10))
         fig.suptitle('Statistical Summary Dashboard', fontsize=18, fontweight='bold')
         
@@ -677,7 +649,6 @@ class ReportGeneratorService:
         additional_info: Optional[Dict[str, Any]],
         charts: List[Dict[str, str]]
     ) -> str:
-        """Generate HTML summary file"""
         summary_path = os.path.join(report_folder, "student_report.html")
         
         html_content = f"""
